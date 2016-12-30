@@ -146,7 +146,7 @@ var Ello = (function() {
     console.log("Element updated!");
   };
 
-  /*ADD !!!!!!!!!!!!*/
+  /*MAKE ACCESSIBLE FROM OUTER SCOPE*/
   return {
     S: S,
     render: render,
