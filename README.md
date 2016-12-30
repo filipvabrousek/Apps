@@ -1,3 +1,3 @@
-#Ello.js
-##Small virtual DOM manipulating library
-##26.12.2015 17:59 - current version
+#Filtery
+##Simple photo editing app
+##30.12.2016 - Beginning
