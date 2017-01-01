@@ -31,7 +31,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         IMPC.sourceType = UIImagePickerControllerSourceType.photoLibrary
         IMPC.allowsEditing = false
         
-        self.present(ViewController, animated: true, completion: nil)
+        self.present(IMPC, animated: true, completion: nil)
     }
     
     
@@ -45,7 +45,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         IMPC.sourceType = UIImagePickerControllerSourceType.camera
         IMPC.allowsEditing = false
     
-        self.present(ViewController, animated: true, completion: nil)
+        self.present(IMPC, animated: true, completion: nil)
         
         
     }
