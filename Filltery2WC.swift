@@ -84,7 +84,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 
-/**/
+/*                                                
+
+
+                                                        IMAGE CROPER                                             
+
+
+
+*/
 
 
 //
