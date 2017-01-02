@@ -6,10 +6,15 @@
 
 
 import UIKit
+import CoreImage
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
 
+   
+    @IBOutlet var imageView: UIImageView!
     
+    
+   
     /*                                                      IMAGE PICKER CONTROLLER                                     */
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage{
@@ -50,7 +55,31 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         
     }
     
-    @IBOutlet weak var imageView: UIImageView!
+    
+    /*                                                          SEPIA FILTER                                                */
+    
+    @IBAction func sepia(_ sender: Any) {
+        
+        guard let image = self.imageView.image?.cgImage else { return }
+        let openGLContext = EAGLContext(api: .openGLES3)
+        let context = CIContext(eaglContext: openGLContext!)
+        
+        let ciImage = CIImage(cgImage: image)
+        
+        let filter = CIFilter(name: "CISepiaTone")
+        filter?.setValue(ciImage, forKey: kCIInputIntensityKey)
+        filter?.setValue(1, forKey: kCIInputIntensityKey)
+        
+        if let output = filter?.value(forKey: kCIOutputImageKey) as? CIImage{
+        self.imageView?.image = UIImage(cgImage: context.createCGImage(output, from: output.extent)!)
+        }
+    }
+    
+
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
