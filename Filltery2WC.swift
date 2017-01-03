@@ -1,20 +1,33 @@
-//3.1.2017 - 21:10
+//
+//  ViewController.swift
+//  SOImagePickerController
+//
+//  Created by myCompany on 9/6/16.
+//  Copyright © 2016 myCompany. All rights reserved.
+//
+
 import UIKit
+import CoreImage
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
-
     
     
-       var context: CIContext = CIContext(options: nil)
+    
+   /*                                                   PHOTO FILTER                                        */
+    
+    var context: CIContext = CIContext(options: nil)
     var appliedFilter: CIFilter!
     
-    
-     /*                                                   PHOTO FILTER                                        */
 
-    @IBAction func handleFilterSelection(_ sender: Any) {
-        
-        let filters = ["CIPhotoEffectMono", "CIFalseColor", "CIColorMonochrome"]
-        let appliedFilter = CIFilter(name: filters[1])
+    //CIAffineTile
+    //CICMYKHalftone
+    //CIMotionBlur
+    //CIPhotoEffectNoir
+    
+    
+    
+    @IBAction func affineTile(_ sender: Any) {
+        let appliedFilter = CIFilter(name: "CIAffineTile")
         let beginImage = CIImage(image: imgView.image!)
         appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
         
@@ -22,10 +35,49 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let filteredImage = UIImage(cgImage: cgImage!)
         
         self.imgView.image = filteredImage
- 
+}
+    
+    
+    @IBAction func halfTone(_ sender: Any) {
+        let appliedFilter = CIFilter(name: "CICMYKHalftone")
+        let beginImage = CIImage(image: imgView.image!)
+        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+        
+        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
+        let filteredImage = UIImage(cgImage: cgImage!)
+        
+        self.imgView.image = filteredImage
+    }
+    
+    
+    @IBAction func blur(_ sender: Any) {
+        let appliedFilter = CIFilter(name: "CIMotionBlur")
+        let beginImage = CIImage(image: imgView.image!)
+        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+        
+        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
+        let filteredImage = UIImage(cgImage: cgImage!)
+        
+        self.imgView.image = filteredImage
+
+    }
+    
+    @IBAction func noir(_ sender: Any) {
+        let appliedFilter = CIFilter(name: "CIPhotoEffectNoir")
+        let beginImage = CIImage(image: imgView.image!)
+        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+        
+        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
+        let filteredImage = UIImage(cgImage: cgImage!)
+        
+        self.imgView.image = filteredImage
+
+        
         
     }
     
+    
+
     var delegate: SOCropVCDelegate?
     @IBOutlet weak var imgView: UIImageView!
     
@@ -34,20 +86,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         // Do any additional setup after loading the view, typically from a nib.
     }
 
-     /*                                                                              IMPC  (camera)                                               */
-    @IBAction func actionClickOnCamera(_ sender: AnyObject) {
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera){
-            let imagePicker = UIImagePickerController()
-            imagePicker.allowsEditing = true;
-            imagePicker.sourceType = UIImagePickerControllerSourceType.camera
-            imagePicker.delegate = self
-            present(imagePicker, animated: true, completion: nil)
-        }else{
-            let alert = UIAlertController(title: "Alert", message: "You don't have a camera for this device", preferredStyle: UIAlertControllerStyle.alert)
-            alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
-    }
     
      /*                                                                             IMPC (gallery)                                                */
     @IBAction func actionClickOnGallery(_ sender: AnyObject) {
@@ -100,14 +138,48 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 
-/*                                                
+/*
+ let filters = ["CIPhotoEffectMono", "CIFalseColor", "CIColorMonochrome"]
+ let appliedFilter = CIFilter(name: filters[1])
+ let beginImage = CIImage(image: imgView.image!)
+ appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+ 
+ let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
+ let filteredImage = UIImage(cgImage: cgImage!)
+ 
+ self.imgView.image = filteredImage
+ */
 
 
-                                                        IMAGE CROPER                                             
 
 
 
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //
@@ -115,7 +187,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 //  SOImagePicker
 //
 //
-
 import UIKit
 import CoreGraphics
 
@@ -843,7 +914,3 @@ internal class SOCropOverlayView: UIView {
     }
 }
 
-
-
-
-/*                                      */
