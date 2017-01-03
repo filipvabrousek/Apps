@@ -138,20 +138,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 
-/*
- let filters = ["CIPhotoEffectMono", "CIFalseColor", "CIColorMonochrome"]
- let appliedFilter = CIFilter(name: filters[1])
- let beginImage = CIImage(image: imgView.image!)
- appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
- 
- let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
- let filteredImage = UIImage(cgImage: cgImage!)
- 
- self.imgView.image = filteredImage
- */
-
-
-
 
 
 
