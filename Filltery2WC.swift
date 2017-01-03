@@ -1,67 +1,31 @@
-
-/*
-
-func handleFilterSelection(action: UIAlertAction!) {
-appliedFilter = CIFilter(name: action.title!)
-
-let beginImage = CIImage(image: imgView.image!)
-appliedFilter.setValue(beginImage, forKey: kCIInputImageKey)
-
-applyFilter()
-}
-
-func applyFilter() {
-let inputKeys = appliedFilter.inputKeys
-let intensity = 0.5
-
-if inputKeys.contains(kCIInputIntensityKey) { appliedFilter.setValue(intensity, forKey: kCIInputIntensityKey) }
-if inputKeys.contains(kCIInputRadiusKey) { appliedFilter.setValue(intensity * 200, forKey: kCIInputRadiusKey) }
-if inputKeys.contains(kCIInputScaleKey) { appliedFilter.setValue(intensity * 10, forKey: kCIInputScaleKey) }
-if inputKeys.contains(kCIInputCenterKey) { appliedFilter.setValue(CIVector(x: imgView.image!.size.width / 2, y: imgView.image!.size.height / 2), forKey: kCIInputCenterKey) }
-
-let cgImage = context.createCGImage(appliedFilter.outputImage!, fromRect: appliedFilter.outputImage!.extent)
-let filteredImage = UIImage(CGImage: cgImage)
-
-self.imgView.image = filteredImage
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-//
-//  ViewController.swift
-//  SOImagePickerController
-//
-//  Created by myCompany on 9/6/16.
-//  Copyright © 2016 myCompany. All rights reserved.
-//
-
+//3.1.2017 - 21:10
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
 
+    
+    
+       var context: CIContext = CIContext(options: nil)
+    var appliedFilter: CIFilter!
+    
+    
+     /*                                                   PHOTO FILTER                                        */
+
+    @IBAction func handleFilterSelection(_ sender: Any) {
+        
+        let filters = ["CIPhotoEffectMono", "CIFalseColor", "CIColorMonochrome"]
+        let appliedFilter = CIFilter(name: filters[1])
+        let beginImage = CIImage(image: imgView.image!)
+        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+        
+        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
+        let filteredImage = UIImage(cgImage: cgImage!)
+        
+        self.imgView.image = filteredImage
+ 
+        
+    }
+    
     var delegate: SOCropVCDelegate?
     @IBOutlet weak var imgView: UIImageView!
     
