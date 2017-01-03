@@ -1,3 +1,55 @@
+
+/*
+
+func handleFilterSelection(action: UIAlertAction!) {
+appliedFilter = CIFilter(name: action.title!)
+
+let beginImage = CIImage(image: imgView.image!)
+appliedFilter.setValue(beginImage, forKey: kCIInputImageKey)
+
+applyFilter()
+}
+
+func applyFilter() {
+let inputKeys = appliedFilter.inputKeys
+let intensity = 0.5
+
+if inputKeys.contains(kCIInputIntensityKey) { appliedFilter.setValue(intensity, forKey: kCIInputIntensityKey) }
+if inputKeys.contains(kCIInputRadiusKey) { appliedFilter.setValue(intensity * 200, forKey: kCIInputRadiusKey) }
+if inputKeys.contains(kCIInputScaleKey) { appliedFilter.setValue(intensity * 10, forKey: kCIInputScaleKey) }
+if inputKeys.contains(kCIInputCenterKey) { appliedFilter.setValue(CIVector(x: imgView.image!.size.width / 2, y: imgView.image!.size.height / 2), forKey: kCIInputCenterKey) }
+
+let cgImage = context.createCGImage(appliedFilter.outputImage!, fromRect: appliedFilter.outputImage!.extent)
+let filteredImage = UIImage(CGImage: cgImage)
+
+self.imgView.image = filteredImage
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
 //
 //  ViewController.swift
 //  SOImagePickerController
