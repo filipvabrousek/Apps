@@ -222,7 +222,7 @@ internal class SOCropVC: UIViewController {
     }
     
     
-    /*                                                                            SETUP BOTTOM VIEW                                                  */
+    /*                                                                 SETUP BOTTOM VIEW  (when cropping an image, create CANCEL and CROP buttons)                                                */
     func setupBottomViewView() {
         let viewBottom = UIView()
         viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
