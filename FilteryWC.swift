@@ -105,7 +105,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         dismiss(animated: true, completion: nil)
     }
     
-    /*              SAVE                y*/
+    /*                                           SAVE                                                            */
     @IBAction func save(_ sender: Any) {
     var imageData = UIImageJPEGRepresentation(imgView.image!, 0.8)
     var compressed = UIImage(data: imageData!)
