@@ -13,15 +13,15 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-   /*                                                   PHOTO FILTER                                        */
+    /*                                                   PHOTO FILTER                                        */
     
     var context: CIContext = CIContext(options: nil)
     var appliedFilter: CIFilter!
     
-
     
     
-   /*                                                      FILTERS                                         */
+    
+    /*                                           FILTERS                                 */
     @IBAction func sepia(_ sender: Any) {
         let appliedFilter = CIFilter(name: "CISepiaTone")
         let beginImage = CIImage(image: imgView.image!)
@@ -45,7 +45,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.imgView.image = filteredImage
     }
     
- 
+    
     @IBAction func chrome(_ sender: Any) {
         let appliedFilter = CIFilter(name: "CIPhotoEffectChrome")
         let beginImage = CIImage(image: imgView.image!)
@@ -66,13 +66,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let filteredImage = UIImage(cgImage: cgImage!)
         
         self.imgView.image = filteredImage
-
         
         
     }
     
     
-
+    
     var delegate: SOCropVCDelegate?
     @IBOutlet weak var imgView: UIImageView!
     
@@ -80,9 +79,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
-
     
-     /*                                                                             IMPC (gallery)                                                */
+    
+    /*                                                                             IMPC (gallery)                                                */
     
     @IBAction func importPhoto(_ sender: Any) {
         let imagePicker = UIImagePickerController()
@@ -91,26 +90,30 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         imagePicker.delegate = self
         present(imagePicker, animated: true, completion: nil)
     }
-   
     
     
-    /*
-
-                                                                               DID FINISH PACKING MEDIA WITH INFO                                                 */
+    
+    /* DID FINISH PACKING MEDIA WITH INFO                                                 */
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         imgView.image = info[UIImagePickerControllerEditedImage] as? UIImage
         dismiss(animated: true, completion: nil)
     }
     
     
-     /*                                                                       IMAGE PICKER CONTROLLER DID CANCEL                                                 */
+    /*                                                                       IMAGE PICKER CONTROLLER DID CANCEL                                                 */
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
     }
-
-
     
-     /*                                                                             ACTION CROP IMAGE                                                */
+    /*              SAVE                y*/
+    @IBAction func save(_ sender: Any) {
+    var imageData = UIImageJPEGRepresentation(imgView.image!, 0.8)
+    var compressed = UIImage(data: imageData!)
+    UIImageWriteToSavedPhotosAlbum(compressed!, nil, nil, nil)
+    }
+    
+    
+    /*                                                                             ACTION CROP IMAGE                                                */
     
     @IBAction func cropImage(_ sender: Any) {
         if imgView.image != nil {
@@ -128,13 +131,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         imgView.image = finishedcropping
     }
     
+  
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
+    
 }
+
+
+
+
+
+
 
 
 
