@@ -9,6 +9,7 @@
 import UIKit
 import CoreImage
 
+/*                                    -CLASS--                VC                                                            */
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
     
     
@@ -193,7 +194,7 @@ internal protocol SOCropVCDelegate {
     func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage)
 }
 
-/*                                                                              SO CROP VC                                                   */
+/*                                                                --CLASS--              SO CROP VC                                                   */
 internal class SOCropVC: UIViewController {
     var imgOriginal: UIImage!
     var delegate: SOCropVCDelegate?
@@ -277,7 +278,7 @@ internal class SOCropVC: UIViewController {
 
 
 
-/*                                                                              SO CROP BORDER VIEW                                                */
+/*                                                                     --CLASS--         SO CROP BORDER VIEW                                                */
 internal class SOCropBorderView: UIView {
     fileprivate let kCircle: CGFloat = 20
     
@@ -337,7 +338,7 @@ internal class SOCropBorderView: UIView {
 
 
 
-/*                                                                              SCROLL VIEW                                                  */
+/*                                                                      --CLASS--       SCROLL VIEW                                                  */
 private class ScrollView: UIScrollView {
     fileprivate override func layoutSubviews() {
         super.layoutSubviews()
@@ -366,7 +367,7 @@ private class ScrollView: UIScrollView {
 }
 
 
-/*                                                                           CROP IMAGE VIEW                                                  */
+/*                                                          --CLASS--                CROP IMAGE VIEW                                                  */
 internal class SOImageCropView: UIView, UIScrollViewDelegate {
     var isAllowCropping = false
     
