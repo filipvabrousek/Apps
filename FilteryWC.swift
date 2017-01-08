@@ -180,7 +180,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 
-
 //
 //  SOImageImageCropViewController.swift
 //  SOImagePicker
@@ -194,7 +193,7 @@ internal protocol SOCropVCDelegate {
     func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage)
 }
 
-/*                                                                --CLASS--              SO CROP VC                                                   */
+/*                                                                              SO CROP VC                                                   */
 internal class SOCropVC: UIViewController {
     var imgOriginal: UIImage!
     var delegate: SOCropVCDelegate?
@@ -223,7 +222,7 @@ internal class SOCropVC: UIViewController {
     }
     
     
-    /*                                                                 SETUP BOTTOM VIEW  (when cropping an image, create CANCEL and CROP buttons)                                                */
+    /*                                                                            SETUP BOTTOM VIEW    (add cancel and crop btn)                                              */
     func setupBottomViewView() {
         let viewBottom = UIView()
         viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
@@ -278,7 +277,7 @@ internal class SOCropVC: UIViewController {
 
 
 
-/*                                                                     --CLASS--         SO CROP BORDER VIEW                                                */
+/*                                                                             ----SO CROP BORDER VIEW (border of crop frame)----                                               */
 internal class SOCropBorderView: UIView {
     fileprivate let kCircle: CGFloat = 20
     
@@ -338,7 +337,7 @@ internal class SOCropBorderView: UIView {
 
 
 
-/*                                                                      --CLASS--       SCROLL VIEW                                                  */
+/*                                                                            ----SCROLL VIEW----                                                  */
 private class ScrollView: UIScrollView {
     fileprivate override func layoutSubviews() {
         super.layoutSubviews()
@@ -367,7 +366,7 @@ private class ScrollView: UIScrollView {
 }
 
 
-/*                                                          --CLASS--                CROP IMAGE VIEW                                                  */
+/*                                                                          ----CROP IMAGE VIEW----                                                  */
 internal class SOImageCropView: UIView, UIScrollViewDelegate {
     var isAllowCropping = false
     
@@ -605,7 +604,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
 
 
 
-/*                                                                              SO RESIZABLE CROP OVERLAY VIEW                                                 */
+/*                                                                           ---SO RESIZABLE CROP OVERLAY VIEW---                                                 */
 internal class SOResizableCropOverlayView: SOCropOverlayView {
     fileprivate let kBorderWidth: CGFloat = 12
     
@@ -686,7 +685,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     
-    /*                                                                             DRAW                                                */
+    /*                                                                                      DRAW                                                     */
     override func draw(_ rect: CGRect) {
         //fill outer rect
         UIColor(red: 0, green: 0, blue: 0, alpha: 0.5).set()
@@ -772,7 +771,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     
-    /*                                                                              RESIZE WITH TOUCH POINT                                                */
+    /*                                                                              RESIZE WITH TOUCH POINT  (prevent going offscreen)                                              */
     fileprivate func resizeWithTouchPoint(_ point: CGPoint) {
         // This is the place where all the magic happends
         // prevent goint offscreen...
@@ -866,7 +865,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
 
 
 
-/*                                                                             ----SO CROP OVERLAY VIEW-----                                                  */
+/*                                                                             ----SO CROP OVERLAY VIEW----                                                  */
 internal class SOCropOverlayView: UIView {
     
     var cropSize: CGSize!
@@ -912,5 +911,3 @@ internal class SOCropOverlayView: UIView {
         UIRectFill(CGRect(x: widthSpan, y: heightSpan, width: self.cropSize.width, height: self.cropSize.height))
     }
 }
-
-
