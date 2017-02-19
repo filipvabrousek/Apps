@@ -66,12 +66,11 @@ import UIKit
 
 class LoginViewController: UIViewController {
 
-  // MARK: Constants
   let loginToList = "LoginToList"
-  
-  // MARK: Outlets
   @IBOutlet weak var textFieldLoginEmail: UITextField!
   @IBOutlet weak var textFieldLoginPassword: UITextField!
+  
+  
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -92,26 +91,20 @@ class LoginViewController: UIViewController {
   
   /*---------------------------------------------SIGN UP--------------------------------------*/
   @IBAction func signUpDidTouch(_ sender: AnyObject) {
-    let alert = UIAlertController(title: "Register",
-                                  message: "Register",
-                                  preferredStyle: .alert)
+    let alert = UIAlertController(title: "Register", message: "Register", preferredStyle: .alert)
     
-    let saveAction = UIAlertAction(title: "Save",
-      style: .default) { action in
+    let saveAction = UIAlertAction(title: "Save", style: .default) { action in
         let emailField = alert.textFields![0] 
         let passwordField = alert.textFields![1] 
       
-        FIRAuth.auth()!.createUser(withEmail: emailField.text!,
-                                   password: passwordField.text!) { user, error in
+        FIRAuth.auth()!.createUser(withEmail: emailField.text!, password: passwordField.text!) { user, error in
           if error == nil {
-            FIRAuth.auth()!.signIn(withEmail: self.textFieldLoginEmail.text!,
-                                   password: self.textFieldLoginPassword.text!)
+            FIRAuth.auth()!.signIn(withEmail: self.textFieldLoginEmail.text!, password: self.textFieldLoginPassword.text!)
           }
         }
     }
     
-    let cancelAction = UIAlertAction(title: "Cancel",
-                                     style: .default)
+    let cancelAction = UIAlertAction(title: "Cancel", style: .default)
     
     alert.addTextField { textEmail in
       textEmail.placeholder = "Enter your email"
@@ -166,10 +159,7 @@ import UIKit
 
 class GroceryListTableViewController: UITableViewController {
 
-  // MARK: Constants
   let listToUsers = "ListToUsers"
-  
-  // MARK: Properties 
   var items: [GroceryItem] = []
   let ref = FIRDatabase.database().reference(withPath: "grocery-items")
   let usersRef = FIRDatabase.database().reference(withPath: "online")
@@ -337,17 +327,13 @@ import UIKit
 
 class OnlineUsersTableViewController: UITableViewController {
 
-  // MARK: Constants
   let userCell = "UserCell"
   let usersRef = FIRDatabase.database().reference(withPath: "online")
-  
-  // MARK: Properties
   var currentUsers: [String] = []
   
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    
     
     /*-------------------------------USERS REF OBSERVE---------------1----------*/
     usersRef.observe(.childAdded, with: { snap in
