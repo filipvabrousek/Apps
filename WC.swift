@@ -1,145 +1,244 @@
-//
-//  ViewController.swift
-//  SOImagePickerController
-//
-//  Created by myCompany on 9/6/16.
-//  Copyright © 2016 myCompany. All rights reserved.
-//
 
 import UIKit
-import CoreImage
 
-/*                                    -CLASS--                VC                                                            */
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
+class LoginViewController: UIViewController {
+  
+  
+  
+  // MARK: Outlets
+  @IBOutlet weak var textFieldLoginEmail: UITextField!
+  @IBOutlet weak var textFieldLoginPassword: UITextField!
+  
+  // MARK: Actions
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+  }
+  
+  
+  /*--------------------------------------------LOGIN----------------------------------------------*/
+  @IBAction func loginDidTouch(_ sender: Any) {
+    FIRAuth.auth()?.signIn(withEmail: textFieldLoginEmail.text!, password: textFieldLoginPassword.text!)
+  }
+  
+  
+ /*---------------------------------------------SIGN UP--------------------------------------*/
+  @IBAction func signUpDidTouch(_ sender: AnyObject) {
+    let alert = UIAlertController(title: "Register", message: "Register", preferredStyle: .alert)
     
-    
-    
-    /*                                                   PHOTO FILTER                                        */
-    
-    var context: CIContext = CIContext(options: nil)
-    var appliedFilter: CIFilter!
-    
-    
-    
-    
-    /*                                           FILTERS                                 */
-    @IBAction func sepia(_ sender: Any) {
-        let appliedFilter = CIFilter(name: "CISepiaTone")
-        let beginImage = CIImage(image: imgView.image!)
-        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
+    let saveAction = UIAlertAction(title: "Save", style: .default) { action in
+      
+      let emailField = alert.textFields![0]
+      let passwordField = alert.textFields![1]
+      
+      FIRAuth.auth()?.createUser(withEmail: emailField.text!, password: passwordField.text!, completion: { (user, error) in
         
-        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
-        let filteredImage = UIImage(cgImage: cgImage!)
-        
-        self.imgView.image = filteredImage
-    }
-    
-    
-    @IBAction func process(_ sender: Any) {
-        let appliedFilter = CIFilter(name: "CIPhotoEffectProcess")
-        let beginImage = CIImage(image: imgView.image!)
-        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
-        
-        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
-        let filteredImage = UIImage(cgImage: cgImage!)
-        
-        self.imgView.image = filteredImage
-    }
-    
-    
-    @IBAction func chrome(_ sender: Any) {
-        let appliedFilter = CIFilter(name: "CIPhotoEffectChrome")
-        let beginImage = CIImage(image: imgView.image!)
-        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
-        
-        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
-        let filteredImage = UIImage(cgImage: cgImage!)
-        
-        self.imgView.image = filteredImage
-    }
-    
-    @IBAction func noir(_ sender: Any) {
-        let appliedFilter = CIFilter(name: "CIPhotoEffectNoir")
-        let beginImage = CIImage(image: imgView.image!)
-        appliedFilter?.setValue(beginImage, forKey: kCIInputImageKey)
-        
-        let cgImage = context.createCGImage((appliedFilter?.outputImage!)!, from: (appliedFilter?.outputImage!.extent)!)
-        let filteredImage = UIImage(cgImage: cgImage!)
-        
-        self.imgView.image = filteredImage
-        
-        
-    }
-    
-    
-    
-    var delegate: SOCropVCDelegate?
-    @IBOutlet weak var imgView: UIImageView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
-    
-    
-    /*                                                                             IMPC (gallery)                                                */
-    
-    @IBAction func importPhoto(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.allowsEditing = true;
-        imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
-        imagePicker.delegate = self
-        present(imagePicker, animated: true, completion: nil)
-    }
-    
-    
-    
-    /* DID FINISH PACKING MEDIA WITH INFO                                                 */
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        imgView.image = info[UIImagePickerControllerEditedImage] as? UIImage
-        dismiss(animated: true, completion: nil)
-    }
-    
-    
-    /*                                                                       IMAGE PICKER CONTROLLER DID CANCEL                                                 */
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    /*                                           SAVE                                                            */
-    @IBAction func save(_ sender: Any) {
-    var imageData = UIImageJPEGRepresentation(imgView.image!, 0.8)
-    var compressed = UIImage(data: imageData!)
-    UIImageWriteToSavedPhotosAlbum(compressed!, nil, nil, nil)
-    }
-    
-    
-    /*                                                                             ACTION CROP IMAGE                                                */
-    
-    @IBAction func cropImage(_ sender: Any) {
-        if imgView.image != nil {
-            let objCropVC = SOCropVC()
-            objCropVC.imgOriginal = imgView.image
-            objCropVC.isAllowCropping = true
-            objCropVC.cropSize = CGSize(width: 320, height: 320)
-            objCropVC.delegate = self
-            self.navigationController?.pushViewController(objCropVC, animated: true)
+        if error != nil {
+          FIRAuth.auth()?.signIn(withEmail: self.textFieldLoginEmail.text!, password: self.textFieldLoginPassword.text!)
         }
+      })
     }
     
+    let cancelAction = UIAlertAction(title: "Cancel", style: .default)
     
-    func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage) {
-        imgView.image = finishedcropping
+    alert.addTextField { textEmail in
+      textEmail.placeholder = "Enter your email"
     }
     
+    alert.addTextField { textPassword in
+      textPassword.isSecureTextEntry = true
+      textPassword.placeholder = "Enter your password"
+    }
+    
+    alert.addAction(saveAction)
+    alert.addAction(cancelAction)
+    
+    present(alert, animated: true, completion: nil)
+  }
+  
+}
+
+
+
+/*-------------------------------TEXTFIELD DELEGATE EXTENSION---------------------------*/
+extension LoginViewController: UITextFieldDelegate {
+  
+  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    if textField == textFieldLoginEmail {
+      textFieldLoginPassword.becomeFirstResponder()
+    }
+    if textField == textFieldLoginPassword {
+      textField.resignFirstResponder()
+    }
+    return true
+  }
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+  Copyright (c) 2015 Razeware LLC
+ */
+
+import UIKit
+
+class GroceryListTableViewController: UITableViewController {
+
+  // MARK: Constants
+  let listToUsers = "ListToUsers"
+  
+  // MARK: Properties 
+  var items: [GroceryItem] = []
+  var user: User!
+  var userCountBarButtonItem: UIBarButtonItem!
+  let ref = FIRDatabase.database().reference(withPath: "grocery-items")
+  let usersRef = FIRDatabase.database().reference(withPath: "online")
+  
+  
+  /*-------------------------------VIEW DID LOAD---------------------------
+   1 - order database items by "completed"
+   2 - append databse items to newItems
+   3 - append items to newItems
+   */
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    tableView.allowsMultipleSelectionDuringEditing = false
+    
+    userCountBarButtonItem = UIBarButtonItem(title: "1", style: .plain, target: self, action: #selector(self.userCountButtonDidTouch))
+    userCountBarButtonItem.tintColor = UIColor.white
+    navigationItem.leftBarButtonItem = userCountBarButtonItem
+    
+    
+    //1
+    ref.queryOrdered(byChild: "completed").observe(.value, with: { snapshot in
+      var newItems: [GroceryItem] = []
+      
+      //2
+      for item in snapshot.children{
+      let groceryItem = GroceryItem(snapshot: item as! FIRDataSnapshot)
+      newItems.append(groceryItem)
+      }
+      
+      //3
+      self.items = newItems
+      self.tableView.reloadData()
+    })
+    
+    
+  /*
+  ???
+     
   
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+  let currentUserRef = self.usersRef.child(self.user.uid)
+  currentUserRef.setValue(self.user.email)
+  currentUserRef.onDisconnectRemoveValue()
+    */
+    
+    usersRef.observe(.value, with: { (snapshot) in
+      if snapshot.exists(){
+      self.userCountBarButtonItem?.title = snapshot.childrenCount.description
+      } else {
+      self.userCountBarButtonItem?.title = "0"
+      }
+    })
+    
+    FIRAuth.auth()!.addStateDidChangeListener { auth, user in
+      guard let user = user else { return }
+      self.user = User(authData: user)
     }
+  
+  }
+  
+  
+  /*-------------------------------TABLEVIEW METHODS--------------------------*/
+  
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return items.count
+  }
+  
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
+    let groceryItem = items[indexPath.row]
     
+    cell.textLabel?.text = groceryItem.name
+    cell.detailTextLabel?.text = groceryItem.addedByUser
+    toggleCellCheckbox(cell, isCompleted: groceryItem.completed)
     
+    return cell
+  }
+  
+  override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    return true
+  }
+  
+  override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    if editingStyle == .delete {
+     let groceryItem = items[indexPath.row]
+    groceryItem.ref?.removeValue()
+    }
+  }
+  
+  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    guard let cell = tableView.cellForRow(at: indexPath) else { return }
+    var groceryItem = items[indexPath.row]
+    let toggledCompletion = !groceryItem.completed
+    toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+    groceryItem.ref?.updateChildValues(["completed" : toggledCompletion])
+  }
+  
+  
+  
+  
+  /*-------------------------------TOOGLE CELL CHECKBOX (check / uncheck an item)--------------------------*/
+  func toggleCellCheckbox(_ cell: UITableViewCell, isCompleted: Bool) {
+    if !isCompleted {
+      cell.accessoryType = .none
+      cell.textLabel?.textColor = UIColor.black
+      cell.detailTextLabel?.textColor = UIColor.black
+    } else {
+      cell.accessoryType = .checkmark
+      cell.textLabel?.textColor = UIColor.gray
+      cell.detailTextLabel?.textColor = UIColor.gray
+    }
+  }
+  
+  /*-------------------------------ADD ITEM--------------------------*/
+  
+  @IBAction func addButtonDidTouch(_ sender: AnyObject) {
+    let alert = UIAlertController(title: "Grocery Item", message: "Add an Item", preferredStyle: .alert)
+    
+    let saveAction = UIAlertAction(title: "Save", style: .default) { action in
+      guard let textField = alert.textFields?.first,
+        let text = textField.text else { return }
+      
+      
+    let groceryItem = GroceryItem(name: text, addedByUser: self.user.email, completed: false)
+    let groceryItemRef = self.ref.child(text.lowercased())
+    groceryItemRef.setValue(groceryItem.toAnyObject)
+    
+    let cancelAction = UIAlertAction(title: "Cancel",style: .default)
+    alert.addTextField()
+    alert.addAction(cancelAction)
+    self.present(alert, animated: true, completion: nil)
+  }
+   alert.addAction(saveAction)
+  }
+  
+  func userCountButtonDidTouch() {
+    performSegue(withIdentifier: listToUsers, sender: nil)
+  }
 }
 
 
@@ -149,765 +248,74 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 
+/*
+ Copyright (c) 2015 Razeware LLC
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
-//  SOImageImageCropViewController.swift
-//  SOImagePicker
-//
-//
 import UIKit
-import CoreGraphics
 
-/*                                                                              CROP DELEGATE                                                   */
-internal protocol SOCropVCDelegate {
-    func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage)
-}
-
-/*                                                                              SO CROP VC                                                   */
-internal class SOCropVC: UIViewController {
-    var imgOriginal: UIImage!
-    var delegate: SOCropVCDelegate?
-    var cropSize: CGSize!
-    var isAllowCropping = false
+class OnlineUsersTableViewController: UITableViewController {
+  
+  // MARK: Constants
+  let userCell = "UserCell"
+  
+  // MARK: Properties
+  var currentUsers: [String] = []
+  let usersRef = FIRDatabase.database().reference(withPath: "online")
+  
+  // MARK: UIViewController Lifecycle
+  override func viewDidLoad() {
+    super.viewDidLoad()
     
-    fileprivate var imgCropped: UIImage!
+    /*-------------------------------USERS REF OBSERVE---------------1----------*/
     
-    fileprivate var imageCropView: SOImageCropView!
+    usersRef.observe(.childAdded, with: { snap in
+      guard let email = snap.value as? String else { return }
+      self.currentUsers.append(email)
+      
+      let row = self.currentUsers.count - 1
+      let indexPath = IndexPath(row: row, section: 0)
+      self.tableView.insertRows(at: [indexPath], with: .top)
+    })
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        self.automaticallyAdjustsScrollViewInsets = false
-        self.navigationController?.isNavigationBarHidden = true
-        
-        self.setupCropView()
-    }
-    
-    
-    /*                                                                             WILL LAYOUT SUBVIEWS                                                  */
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        self.imageCropView.frame = self.view.bounds
-        setupBottomViewView()
-    }
-    
-    
-    /*                                                                            SETUP BOTTOM VIEW    (add cancel and crop btn)                                              */
-    func setupBottomViewView() {
-        let viewBottom = UIView()
-        viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
-        viewBottom.backgroundColor = UIColor.darkGray
-        self.view.addSubview(viewBottom)
-        
-        let btnCancel = UIButton()
-        btnCancel.frame = CGRect(x: 10, y: 17, width: 60, height: 30)
-        btnCancel.layer.cornerRadius = 5.0
-        btnCancel.layer.masksToBounds = true
-        btnCancel.setTitleColor(UIColor.black, for: UIControlState())
-        btnCancel.setTitle("Cancel", for: UIControlState())
-        btnCancel.backgroundColor = UIColor.white
-        btnCancel.addTarget(self, action: #selector(actionCancel), for: .touchUpInside)
-        viewBottom.addSubview(btnCancel)
-        
-        let btnCrop = UIButton()
-        btnCrop.frame = CGRect(x: self.view.frame.size.width-50-10, y: 17, width: 50, height: 30)
-        btnCrop.layer.cornerRadius = 5.0
-        btnCrop.layer.masksToBounds = true
-        btnCrop.setTitleColor(UIColor.black, for: UIControlState())
-        btnCrop.setTitle("Crop", for: UIControlState())
-        btnCrop.backgroundColor = UIColor.white
-        btnCrop.addTarget(self, action: #selector(actionCrop), for: .touchUpInside)
-        viewBottom.addSubview(btnCrop)
-        
-    }
-    
-    
-    /*                                                                              ACTION CANCEL                                                   */
-    func actionCancel(_ sender: AnyObject?) {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    /*                                                                              ACTION CROP                                                  */
-    func actionCrop(_ sender: AnyObject) {
-        imgCropped = self.imageCropView.croppedImage()
-        self.delegate?.imagecropvc(self, finishedcropping:imgCropped)
-        self.actionCancel(nil)
-    }
-    
-    
-    /*                                                                              SET UP CROP VIEW                                                  */
-    fileprivate func setupCropView() {
-        self.imageCropView = SOImageCropView(frame: self.view.bounds)
-        self.imageCropView.imgCrop = imgOriginal
-        self.imageCropView.isAllowCropping = self.isAllowCropping
-        self.imageCropView.cropSize = cropSize
-        self.view.addSubview(self.imageCropView)
-    }
-}
-
-
-
-/*                                                                             ----SO CROP BORDER VIEW (border of crop frame)----                                               */
-internal class SOCropBorderView: UIView {
-    fileprivate let kCircle: CGFloat = 20
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        self.backgroundColor = UIColor.clear
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        self.backgroundColor = UIColor.clear
-    }
-    
-    override func draw(_ rect: CGRect) {
-        let context = UIGraphicsGetCurrentContext()
-        
-        context?.setStrokeColor(UIColor(red: 0.16, green: 0.25, blue: 0.75, alpha: 0.5).cgColor)
-        context?.setLineWidth(1.5)
-        context?.addRect(CGRect(x: kCircle / 2, y: kCircle / 2,
-                                width: rect.size.width - kCircle, height: rect.size.height - kCircle))
-        context?.strokePath()
-        
-        context?.setFillColor(red: 0.16, green: 0.25, blue: 0.35, alpha: 0.95)
-        for handleRect in calculateAllNeededHandleRects() {
-            context?.fillEllipse(in: handleRect)
+    usersRef.observe(.childRemoved, with: { (snap) in
+      guard let emailToFind = snap.value as? String else { return }
+      
+      for (index, email) in self.currentUsers.enumerated(){
+        if email == emailToFind{
+        let indexPath = IndexPath(row: index, section: 0)
+        self.currentUsers.remove(at: index)
+        self.tableView.deleteRows(at: [indexPath], with: .fade)
         }
-    }
-    
-    fileprivate func calculateAllNeededHandleRects() -> [CGRect] {
-        
-        let width = self.frame.width
-        let height = self.frame.height
-        
-        let leftColX: CGFloat = 0
-        let rightColX = width - kCircle
-        let centerColX = rightColX / 2
-        
-        let topRowY: CGFloat = 0
-        let bottomRowY = height - kCircle
-        let middleRowY = bottomRowY / 2
-        
-        //starting with the upper left corner and then following clockwise
-        let topLeft = CGRect(x: leftColX, y: topRowY, width: kCircle, height: kCircle)
-        let topCenter = CGRect(x: centerColX, y: topRowY, width: kCircle, height: kCircle)
-        let topRight = CGRect(x: rightColX, y: topRowY, width: kCircle, height: kCircle)
-        let middleRight = CGRect(x: rightColX, y: middleRowY, width: kCircle, height: kCircle)
-        let bottomRight = CGRect(x: rightColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let bottomCenter = CGRect(x: centerColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let bottomLeft = CGRect(x: leftColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let middleLeft = CGRect(x: leftColX, y: middleRowY, width: kCircle, height: kCircle)
-        
-        return [topLeft, topCenter, topRight, middleRight, bottomRight, bottomCenter, bottomLeft,
-                middleLeft]
-    }
+      
+      }
+    })
+  }
+  
+  /*-------------------------------USERS REF OBSERVE---------------2----------*/
+
+  
+  // MARK: UITableView Delegate methods
+  
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return currentUsers.count
+  }
+  
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: userCell, for: indexPath)
+    let onlineUserEmail = currentUsers[indexPath.row]
+    cell.textLabel?.text = onlineUserEmail
+    return cell
+  }
+  
+  // MARK: Actions
+  
+  @IBAction func signoutButtonPressed(_ sender: AnyObject) {
+    dismiss(animated: true, completion: nil)
+  }
+  
 }
 
 
 
 
-/*                                                                            ----SCROLL VIEW----                                                  */
-private class ScrollView: UIScrollView {
-    fileprivate override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        if let zoomView = self.delegate?.viewForZooming?(in: self) {
-            let boundsSize = self.bounds.size
-            var frameToCenter = zoomView.frame
-            
-            // center horizontally
-            if frameToCenter.size.width < boundsSize.width {
-                frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2
-            } else {
-                frameToCenter.origin.x = 0
-            }
-            
-            // center vertically
-            if frameToCenter.size.height < boundsSize.height {
-                frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
-            } else {
-                frameToCenter.origin.y = 0
-            }
-            
-            zoomView.frame = frameToCenter
-        }
-    }
-}
-
-
-/*                                                                          ----CROP IMAGE VIEW----                                                  */
-internal class SOImageCropView: UIView, UIScrollViewDelegate {
-    var isAllowCropping = false
-    
-    fileprivate var scrollView: UIScrollView!
-    fileprivate var imageView: UIImageView!
-    fileprivate var cropOverlayView: SOCropOverlayView!
-    fileprivate var xOffset: CGFloat!
-    fileprivate var yOffset: CGFloat!
-    
-    fileprivate static func scaleRect(_ rect: CGRect, scale: CGFloat) -> CGRect {
-        return CGRect(
-            x: rect.origin.x * scale,
-            y: rect.origin.y * scale,
-            width: rect.size.width * scale,
-            height: rect.size.height * scale)
-    }
-    
-    var imgCrop: UIImage? {
-        get {
-            return self.imageView.image
-        }
-        set {
-            self.imageView.image = newValue
-        }
-    }
-    
-    var cropSize: CGSize {
-        get {
-            return self.cropOverlayView.cropSize
-        }
-        set {
-            if let view = self.cropOverlayView {
-                view.cropSize = newValue
-            } else {
-                if self.isAllowCropping {
-                    self.cropOverlayView = SOResizableCropOverlayView(frame: self.bounds,
-                                                                      initialContentSize: CGSize(width: newValue.width, height: newValue.height))
-                } else {
-                    self.cropOverlayView = SOCropOverlayView(frame: self.bounds)
-                }
-                self.cropOverlayView.cropSize = newValue
-                self.addSubview(self.cropOverlayView)
-            }
-        }
-    }
-    
-    
-    
-    /*                                                                              FRAME                                                  */
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        self.isUserInteractionEnabled = true
-        self.backgroundColor = UIColor.black
-        self.scrollView = ScrollView(frame: frame)
-        self.scrollView.showsHorizontalScrollIndicator = false
-        self.scrollView.showsVerticalScrollIndicator = false
-        self.scrollView.delegate = self
-        self.scrollView.clipsToBounds = false
-        self.scrollView.decelerationRate = 0
-        self.scrollView.backgroundColor = UIColor.clear
-        self.addSubview(self.scrollView)
-        
-        self.imageView = UIImageView(frame: self.scrollView.frame)
-        self.imageView.contentMode = .scaleAspectFit
-        self.imageView.backgroundColor = UIColor.black
-        self.scrollView.addSubview(self.imageView)
-        
-        self.scrollView.minimumZoomScale =
-            self.scrollView.frame.width / self.scrollView.frame.height
-        self.scrollView.maximumZoomScale = 20
-        self.scrollView.setZoomScale(1.0, animated: false)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-    
-    /*                                                                             HIT TEST                                                */
-    
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if !isAllowCropping {
-            return self.scrollView
-        }
-        
-        let resizableCropView = cropOverlayView as! SOResizableCropOverlayView
-        let outerFrame = resizableCropView.cropBorderView.frame.insetBy(dx: -10, dy: -10)
-        
-        if outerFrame.contains(point) {
-            if resizableCropView.cropBorderView.frame.size.width < 60 ||
-                resizableCropView.cropBorderView.frame.size.height < 60 {
-                return super.hitTest(point, with: event)
-            }
-            
-            let innerTouchFrame = resizableCropView.cropBorderView.frame.insetBy(dx: 30, dy: 30)
-            if innerTouchFrame.contains(point) {
-                return self.scrollView
-            }
-            
-            let outBorderTouchFrame = resizableCropView.cropBorderView.frame.insetBy(dx: -10, dy: -10)
-            if outBorderTouchFrame.contains(point) {
-                return super.hitTest(point, with: event)
-            }
-            
-            return super.hitTest(point, with: event)
-        }
-        
-        return self.scrollView
-    }
-    
-    
-    
-    /*                                                                              LAYOUT SUBVIEWS                                                  */
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        let size = self.cropSize;
-        let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
-        self.xOffset = floor((self.bounds.width - size.width) * 0.5)
-        self.yOffset = floor((self.bounds.height - toolbarSize - size.height) * 0.5)
-        
-        let height = self.imgCrop!.size.height
-        let width = self.imgCrop!.size.width
-        
-        var factor: CGFloat = 0
-        var factoredHeight: CGFloat = 0
-        var factoredWidth: CGFloat = 0
-        
-        if width > height {
-            factor = width / size.width
-            factoredWidth = size.width
-            factoredHeight =  height / factor
-        } else {
-            factor = height / size.height
-            factoredWidth = width / factor
-            factoredHeight = size.height
-        }
-        
-        self.cropOverlayView.frame = self.bounds
-        self.scrollView.frame = CGRect(x: xOffset, y: yOffset, width: size.width, height: size.height)
-        self.scrollView.contentSize = CGSize(width: size.width, height: size.height)
-        self.imageView.frame = CGRect(x: 0, y: floor((size.height - factoredHeight) * 0.5),
-                                      width: factoredWidth, height: factoredHeight)
-    }
-    
-    
-    /*                                                                             VIEW FOR ZOOMING                                                 */
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return self.imageView
-    }
-    
-    func croppedImage() -> UIImage {
-        // Calculate rect that needs to be cropped
-        var visibleRect = isAllowCropping ?
-            calcVisibleRectForResizeableCropArea() : calcVisibleRectForCropArea()
-        
-        // transform visible rect to image orientation
-        let rectTransform = orientationTransformedRectOfImage(imgCrop!)
-        visibleRect = visibleRect.applying(rectTransform);
-        
-        // finally crop image
-        let imageRef = imgCrop!.cgImage?.cropping(to: visibleRect)
-        let result = UIImage(cgImage: imageRef!, scale: imgCrop!.scale,
-                             orientation: imgCrop!.imageOrientation)
-        
-        return result
-    }
-    
-    
-    /*                                                                             CALC VISIBLE RECT FOR RESIZEABLE CROP AREA                                                */
-    fileprivate func calcVisibleRectForResizeableCropArea() -> CGRect {
-        let resizableView = cropOverlayView as! SOResizableCropOverlayView
-        
-        // first of all, get the size scale by taking a look at the real image dimensions. Here it
-        // doesn't matter if you take the width or the hight of the image, because it will always
-        // be scaled in the exact same proportion of the real image
-        var sizeScale = self.imageView.image!.size.width / self.imageView.frame.size.width
-        sizeScale *= self.scrollView.zoomScale
-        
-        // then get the postion of the cropping rect inside the image
-        var visibleRect = resizableView.contentView.convert(resizableView.contentView.bounds,
-                                                            to: imageView)
-        visibleRect = SOImageCropView.scaleRect(visibleRect, scale: sizeScale)
-        
-        return visibleRect
-    }
-    
-    
-    /*                                                                              CALC VISIBLE RECT FOR CROP AREA                                              */
-    fileprivate func calcVisibleRectForCropArea() -> CGRect {
-        // scaled width/height in regards of real width to crop width
-        let scaleWidth = imgCrop!.size.width / cropSize.width
-        let scaleHeight = imgCrop!.size.height / cropSize.height
-        var scale: CGFloat = 0
-        
-        if cropSize.width == cropSize.height {
-            scale = max(scaleWidth, scaleHeight)
-        } else if cropSize.width > cropSize.height {
-            scale = imgCrop!.size.width < imgCrop!.size.height ?
-                max(scaleWidth, scaleHeight) :
-                min(scaleWidth, scaleHeight)
-        } else {
-            scale = imgCrop!.size.width < imgCrop!.size.height ?
-                min(scaleWidth, scaleHeight) :
-                max(scaleWidth, scaleHeight)
-        }
-        
-        // extract visible rect from scrollview and scale it
-        var visibleRect = scrollView.convert(scrollView.bounds, to:imageView)
-        visibleRect = SOImageCropView.scaleRect(visibleRect, scale: scale)
-        
-        return visibleRect
-    }
-    
-    
-    
-    /*                                                                            ORIENTATION TRANSFORMED RECT FOR IMAGE                                                 */
-    fileprivate func orientationTransformedRectOfImage(_ image: UIImage) -> CGAffineTransform {
-        var rectTransform: CGAffineTransform!
-        
-        switch image.imageOrientation {
-        case .left:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(M_PI_2)).translatedBy(x: 0, y: -image.size.height)
-        case .right:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2)).translatedBy(x: -image.size.width, y: 0)
-        case .down:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-M_PI)).translatedBy(x: -image.size.width, y: -image.size.height)
-        default:
-            rectTransform = CGAffineTransform.identity
-        }
-        
-        return rectTransform.scaledBy(x: image.scale, y: image.scale)
-    }
-}
-
-
-
-/*                                                                           ---SO RESIZABLE CROP OVERLAY VIEW---                                                 */
-internal class SOResizableCropOverlayView: SOCropOverlayView {
-    fileprivate let kBorderWidth: CGFloat = 12
-    
-    var contentView: UIView!
-    var cropBorderView: SOCropBorderView!
-    
-    fileprivate var initialContentSize = CGSize(width: 0, height: 0)
-    fileprivate var resizingEnabled: Bool!
-    fileprivate var anchor: CGPoint!
-    fileprivate var startPoint: CGPoint!
-    
-    var widthValue: CGFloat!
-    var heightValue: CGFloat!
-    var xValue: CGFloat!
-    var yValue: CGFloat!
-    
-    override var frame: CGRect {
-        get {
-            return super.frame
-        }
-        set {
-            super.frame = newValue
-            
-            let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
-            let width = self.bounds.size.width
-            let height = self.bounds.size.height
-            
-            contentView?.frame = CGRect(x: (
-                width - initialContentSize.width) / 2,
-                                        y: (height - toolbarSize - initialContentSize.height) / 2,
-                                        width: initialContentSize.width,
-                                        height: initialContentSize.height)
-            
-            cropBorderView?.frame = CGRect(
-                x: (width - initialContentSize.width) / 2 - kBorderWidth,
-                y: (height - toolbarSize - initialContentSize.height) / 2 - kBorderWidth,
-                width: initialContentSize.width + kBorderWidth * 2,
-                height: initialContentSize.height + kBorderWidth * 2)
-        }
-    }
-    
-    init(frame: CGRect, initialContentSize: CGSize) {
-        super.init(frame: frame)
-        
-        self.initialContentSize = initialContentSize
-        self.addContentViews()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    
-    
-    /*                                                                              TOUCHES BEGAN                                                 */
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let touchPoint = touch.location(in: cropBorderView)
-            
-            anchor = self.calculateAnchorBorder(touchPoint)
-            fillMultiplyer()
-            resizingEnabled = true
-            startPoint = touch.location(in: self.superview)
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            if resizingEnabled! {
-                self.resizeWithTouchPoint(touch.location(in: self.superview))
-            }
-        }
-    }
-    
-    
-    
-    /*                                                                                      DRAW                                                     */
-    override func draw(_ rect: CGRect) {
-        //fill outer rect
-        UIColor(red: 0, green: 0, blue: 0, alpha: 0.5).set()
-        UIRectFill(self.bounds)
-        
-        //fill inner rect
-        UIColor.clear.set()
-        UIRectFill(self.contentView.frame)
-    }
-    
-    
-    
-    
-    /*                                                                              ADD CONTENT VIEW                                                 */
-    fileprivate func addContentViews() {
-        let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
-        let width = self.bounds.size.width
-        let height = self.bounds.size.height
-        
-        contentView = UIView(frame: CGRect(x: (
-            width - initialContentSize.width) / 2,
-                                           y: (height - toolbarSize - initialContentSize.height) / 2,
-                                           width: initialContentSize.width,
-                                           height: initialContentSize.height))
-        contentView.backgroundColor = UIColor.clear
-        self.cropSize = contentView.frame.size
-        self.addSubview(contentView)
-        
-        cropBorderView = SOCropBorderView(frame: CGRect(
-            x: (width - initialContentSize.width) / 2 - kBorderWidth,
-            y: (height - toolbarSize - initialContentSize.height) / 2 - kBorderWidth,
-            width: initialContentSize.width + kBorderWidth * 2,
-            height: initialContentSize.height + kBorderWidth * 2))
-        self.addSubview(cropBorderView)
-    }
-    
-    
-    
-    /*                                                                            CALCULATE ANOTHER BORDER                                                 */
-    fileprivate func calculateAnchorBorder(_ anchorPoint: CGPoint) -> CGPoint {
-        let allHandles = getAllCurrentHandlePositions()
-        var closest: CGFloat = 3000
-        var anchor: CGPoint!
-        
-        for handlePoint in allHandles {
-            // Pythagoras is watching you :-)
-            let xDist = handlePoint.x - anchorPoint.x
-            let yDist = handlePoint.y - anchorPoint.y
-            let dist = sqrt(xDist * xDist + yDist * yDist)
-            
-            closest = dist < closest ? dist : closest
-            anchor = closest == dist ? handlePoint : anchor
-        }
-        
-        return anchor
-    }
-    
-    
-    /*                                                                              GET ALL CURRENT HANDLE POSITIONS                                                */
-    fileprivate func getAllCurrentHandlePositions() -> [CGPoint] {
-        let leftX: CGFloat = 0
-        let rightX = cropBorderView.bounds.size.width
-        let centerX = leftX + (rightX - leftX) / 2
-        
-        let topY: CGFloat = 0
-        let bottomY = cropBorderView.bounds.size.height
-        let middleY = topY + (bottomY - topY) / 2
-        
-        // starting with the upper left corner and then following the rect clockwise
-        let topLeft = CGPoint(x: leftX, y: topY)
-        let topCenter = CGPoint(x: centerX, y: topY)
-        let topRight = CGPoint(x: rightX, y: topY)
-        let middleRight = CGPoint(x: rightX, y: middleY)
-        let bottomRight = CGPoint(x: rightX, y: bottomY)
-        let bottomCenter = CGPoint(x: centerX, y: bottomY)
-        let bottomLeft = CGPoint(x: leftX, y: bottomY)
-        let middleLeft = CGPoint(x: leftX, y: middleY)
-        
-        return [topLeft, topCenter, topRight, middleRight, bottomRight, bottomCenter, bottomLeft,
-                middleLeft]
-    }
-    
-    
-    
-    
-    /*                                                                              RESIZE WITH TOUCH POINT  (prevent going offscreen)                                              */
-    fileprivate func resizeWithTouchPoint(_ point: CGPoint) {
-        // This is the place where all the magic happends
-        // prevent goint offscreen...
-        let border = kBorderWidth * 2
-        var pointX = point.x < border ? border : point.x
-        var pointY = point.y < border ? border : point.y
-        pointX = pointX > self.superview!.bounds.size.width - border ?
-            self.superview!.bounds.size.width - border : pointX
-        pointY = pointY > self.superview!.bounds.size.height - border ?
-            self.superview!.bounds.size.height - border : pointY
-        
-        let heightNew = (pointY - startPoint.y) * heightValue
-        let widthNew = (startPoint.x - pointX) * widthValue
-        let xNew = -1 * widthNew * xValue
-        let yNew = -1 * heightNew * yValue
-        
-        var newFrame =  CGRect(
-            x: cropBorderView.frame.origin.x + xNew,
-            y: cropBorderView.frame.origin.y + yNew,
-            width: cropBorderView.frame.size.width + widthNew,
-            height: cropBorderView.frame.size.height + heightNew);
-        newFrame = self.preventBorderFrameFromGettingTooSmallOrTooBig(newFrame)
-        self.resetFrame(to: newFrame)
-        startPoint = CGPoint(x: pointX, y: pointY)
-    }
-    
-    
-    
-    /*                                                                             PREVENT BORDER FRAME FROM GETTING TOO SMALL OR TOO BIG                                                 */
-    fileprivate func preventBorderFrameFromGettingTooSmallOrTooBig(_ frame: CGRect) -> CGRect {
-        let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
-        var newFrame = frame
-        
-        if newFrame.size.width < 64 {
-            newFrame.size.width = cropBorderView.frame.size.width
-            newFrame.origin.x = cropBorderView.frame.origin.x
-        }
-        if newFrame.size.height < 64 {
-            newFrame.size.height = cropBorderView.frame.size.height
-            newFrame.origin.y = cropBorderView.frame.origin.y
-        }
-        
-        if newFrame.origin.x < 0 {
-            newFrame.size.width = cropBorderView.frame.size.width +
-                (cropBorderView.frame.origin.x - self.superview!.bounds.origin.x)
-            newFrame.origin.x = 0
-        }
-        
-        if newFrame.origin.y < 0 {
-            newFrame.size.height = cropBorderView.frame.size.height +
-                (cropBorderView.frame.origin.y - self.superview!.bounds.origin.y)
-            newFrame.origin.y = 0
-        }
-        
-        if newFrame.size.width + newFrame.origin.x > self.frame.size.width {
-            newFrame.size.width = self.frame.size.width - cropBorderView.frame.origin.x
-        }
-        
-        if newFrame.size.height + newFrame.origin.y > self.frame.size.height - toolbarSize {
-            newFrame.size.height = self.frame.size.height -
-                cropBorderView.frame.origin.y - toolbarSize
-        }
-        
-        return newFrame
-    }
-    
-    
-    
-    /*                                                                              RESET FRAME                                               */
-    fileprivate func resetFrame(to frame: CGRect) {
-        cropBorderView.frame = frame
-        contentView.frame = frame.insetBy(dx: kBorderWidth, dy: kBorderWidth)
-        cropSize = contentView.frame.size
-        self.setNeedsDisplay()
-        cropBorderView.setNeedsDisplay()
-    }
-    
-    
-    
-    /*                                                                            FILL MULTIPLYER                                                 */
-    fileprivate func fillMultiplyer() {
-        heightValue = anchor.y == 0 ?
-            -1 : anchor.y == cropBorderView.bounds.size.height ? 1 : 0
-        widthValue = anchor.x == 0 ?
-            1 : anchor.x == cropBorderView.bounds.size.width ? -1 : 0
-        xValue = anchor.x == 0 ? 1 : 0
-        yValue = anchor.y == 0 ? 1 : 0
-    }
-}
-
-
-
-
-/*                                                                             ----SO CROP OVERLAY VIEW----                                                  */
-internal class SOCropOverlayView: UIView {
-    
-    var cropSize: CGSize!
-    var toolbar: UIToolbar!
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        self.backgroundColor = UIColor.clear
-        self.isUserInteractionEnabled = true
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        
-        self.backgroundColor = UIColor.clear
-        self.isUserInteractionEnabled = true
-    }
-    
-    
-    /*                                                                              DRAW                                               */
-    override func draw(_ rect: CGRect) {
-        
-        let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
-        
-        let width = self.frame.width
-        let height = self.frame.height - toolbarSize
-        
-        let heightSpan = floor(height / 2 - self.cropSize.height / 2)
-        let widthSpan = floor(width / 2 - self.cropSize.width / 2)
-        
-        // fill outer rect
-        UIColor(red: 0, green: 0, blue: 0, alpha: 0.5).set()
-        UIRectFill(self.bounds)
-        
-        // fill inner border
-        UIColor(red: 1, green: 1, blue: 1, alpha: 0.5).set()
-        UIRectFrame(CGRect(x: widthSpan - 2, y: heightSpan - 2, width: self.cropSize.width + 4,
-                           height: self.cropSize.height + 4))
-        
-        // fill inner rect
-        UIColor.clear.set()
-        UIRectFill(CGRect(x: widthSpan, y: heightSpan, width: self.cropSize.width, height: self.cropSize.height))
-    }
-}
