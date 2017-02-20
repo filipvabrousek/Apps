@@ -1,386 +1,588 @@
-import Foundation
+/*
+ * Copyright (c) 2015 Razeware LLC
+ */
 
-struct User {
+internal class Channel {
+  internal let id: String
+  internal let name: String
   
-  let uid: String
-  let email: String
-  
-  init(authData: FIRUser) {
-    uid = authData.uid
-    email = authData.email!
-  }
-  
-  init(uid: String, email: String) {
-    self.uid = uid
-    self.email = email
-  }
-  
-}
-
-
-
-import Foundation
-
-struct GroceryItem {
-  
-  let key: String
-  let name: String
-  let addedByUser: String
-  let ref: FIRDatabaseReference?
-  var completed: Bool
-  
-  init(name: String, addedByUser: String, completed: Bool, key: String = "") {
-    self.key = key
+  init(id: String, name: String) {
+    self.id = id
     self.name = name
-    self.addedByUser = addedByUser
-    self.completed = completed
-    self.ref = nil
   }
-  
-  init(snapshot: FIRDataSnapshot) {
-    key = snapshot.key
-    let snapshotValue = snapshot.value as! [String: AnyObject]
-    name = snapshotValue["name"] as! String
-    addedByUser = snapshotValue["addedByUser"] as! String
-    completed = snapshotValue["completed"] as! Bool
-    ref = snapshot.ref
-  }
-  
-  func toAnyObject() -> Any {
-    return [
-      "name": name,
-      "addedByUser": addedByUser,
-      "completed": completed
-    ]
-  }
-  
 }
 
 
-
-
-
-
+/*
+* Copyright (c) 2015 Razeware LLC
+*/
 
 import UIKit
+import Firebase
 
 class LoginViewController: UIViewController {
+  
+  // VARIABLES, PROPERTIES
+  @IBOutlet weak var nameField: UITextField!
+  @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
 
-  let loginToList = "LoginToList"
-  @IBOutlet weak var textFieldLoginEmail: UITextField!
-  @IBOutlet weak var textFieldLoginPassword: UITextField!
+
+   /*-------------------------------------VIEW WILL APPERAR / DISAPPEAR-----------------------*/
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShowNotification(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHideNotification(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+  }
   
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+    NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+  }
   
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    FIRAuth.auth()!.addStateDidChangeListener() { auth, user in
-      if user != nil {
-        self.performSegue(withIdentifier: self.loginToList, sender: nil)
-      }
+  /*--------------------------------------------LOGIN----------------------------------------*/
+  @IBAction func loginDidTouch(_ sender: AnyObject) {
+    if nameField?.text != "" {
+      FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
+        if let err:Error = error {
+          print(err.localizedDescription)
+          return
+        }
+        
+        self.performSegue(withIdentifier: "LoginToChat", sender: nil)
+      })
     }
   }
   
-  /*--------------------------------------------LOGIN---------correct-------------------------------------*/
-  @IBAction func loginDidTouch(_ sender: AnyObject) {
-    FIRAuth.auth()!.signIn(withEmail: textFieldLoginEmail.text!,
-                           password: textFieldLoginPassword.text!)
+/*--------------------------------------------PREPARE FOR SEGUE---------------1-----------------*/
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    super.prepare(for: segue, sender: sender)
+    let navVc = segue.destination as! UINavigationController
+    let channelVc = navVc.viewControllers.first as! ChannelListViewController
+    channelVc.senderDisplayName = nameField?.text
+  }
+  
+/*--------------------------------------------NOTIFICATIONS----------------------------------------*/
+  func keyboardWillShowNotification(_ notification: Notification) {
+    let keyboardEndFrame = ((notification as NSNotification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+    let convertedKeyboardEndFrame = view.convert(keyboardEndFrame, from: view.window)
+    bottomLayoutGuideConstraint.constant = view.bounds.maxY - convertedKeyboardEndFrame.minY
+  }
+  
+  func keyboardWillHideNotification(_ notification: Notification) {
+    bottomLayoutGuideConstraint.constant = 48
+  }
+}
+
+
+
+
+/*
+Copyright (c) 2015 Razeware LLC
+ */
+
+import UIKit
+import Firebase
+
+enum Section: Int {
+  case createNewChannelSection = 0
+  case currentChannelsSection
+}
+
+class ChannelListViewController: UITableViewController {
+
+ // VARIABLES, PROPERTIES
+  var senderDisplayName: String?
+  var newChannelTextField: UITextField?
+  
+  private var channelRefHandle: FIRDatabaseHandle?
+  private var channels: [Channel] = []
+  
+  private lazy var channelRef: FIRDatabaseReference = FIRDatabase.database().reference().child("channels")
+  
+ 
+/*--------------------------------------------VIEW DID LOAD----------------------------------------*/
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    title = "RW RIC"
+    observeChannels()
+  }
+  
+  deinit {
+    if let refHandle = channelRefHandle {
+      channelRef.removeObserver(withHandle: refHandle)
+    }
+  }
+  
+/*--------------------------------------------CREATE CHANNEL----------------------------------------*/
+  @IBAction func createChannel(_ sender: AnyObject) {
+    if let name = newChannelTextField?.text {
+      let newChannelRef = channelRef.childByAutoId()
+      let channelItem = [
+        "name": name
+      ]
+      newChannelRef.setValue(channelItem)
+    }    
+  }
+  
+  
+/*--------------------------------------------OBSERVE CHANNELS----------------------------------------*/
+  private func observeChannels() {
+    // We can use the observe method to listen for new
+    // channels being written to the Firebase DB
+    channelRefHandle = channelRef.observe(.childAdded, with: { (snapshot) -> Void in
+      let channelData = snapshot.value as! Dictionary<String, AnyObject>
+      let id = snapshot.key
+      if let name = channelData["name"] as! String!, name.characters.count > 0 {
+        self.channels.append(Channel(id: id, name: name))
+        self.tableView.reloadData()
+      } else {
+        print("Error! Could not decode channel data")
+      }
+    })
+  }
+  
+
+/*--------------------------------------------PREPARE FOR SEGUE-------------------2---------------------*/
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    super.prepare(for: segue, sender: sender)
+    
+    if let channel = sender as? Channel {
+      let chatVc = segue.destination as! ChatViewController
+      
+      chatVc.senderDisplayName = senderDisplayName
+      chatVc.channel = channel
+      chatVc.channelRef = channelRef.child(channel.id)
+    }
+  }
+  
+/*--------------------------------------------TABLE VIEW METHODS----------------------------------------*/
+  override func numberOfSections(in tableView: UITableView) -> Int {
+    return 2
+  }
+  
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    if let currentSection: Section = Section(rawValue: section) {
+      switch currentSection {
+      case .createNewChannelSection:
+        return 1
+      case .currentChannelsSection:
+        return channels.count
+      }
+    } else {
+      return 0
+    }
+  }
+  
+  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let reuseIdentifier = (indexPath as NSIndexPath).section == Section.createNewChannelSection.rawValue ? "NewChannel" : "ExistingChannel"
+    let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
+
+    if (indexPath as NSIndexPath).section == Section.createNewChannelSection.rawValue {
+      if let createNewChannelCell = cell as? CreateChannelCell {
+        newChannelTextField = createNewChannelCell.newChannelNameField
+      }
+    } else if (indexPath as NSIndexPath).section == Section.currentChannelsSection.rawValue {
+      cell.textLabel?.text = channels[(indexPath as NSIndexPath).row].name
+    }
+    
+    return cell
   }
 
+ 
+  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    if (indexPath as NSIndexPath).section == Section.currentChannelsSection.rawValue {
+      let channel = channels[(indexPath as NSIndexPath).row]
+      self.performSegue(withIdentifier: "ShowChannel", sender: channel)
+    }
+  }
   
-  /*---------------------------------------------SIGN UP--------------------------------------*/
-  @IBAction func signUpDidTouch(_ sender: AnyObject) {
-    let alert = UIAlertController(title: "Register", message: "Register", preferredStyle: .alert)
+}
+
+
+
+
+
+
+
+
+/*
+* Copyright (c) 2015 Razeware LLC
+*/
+
+import UIKit
+import Photos
+import Firebase
+import JSQMessagesViewController
+
+final class ChatViewController: JSQMessagesViewController {
+  
+  // VARIABLES, PROPERTIES
+  private let imageURLNotSetKey = "NOTSET"
+  
+  var channelRef: FIRDatabaseReference?
+
+  private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
+  fileprivate lazy var storageRef: FIRStorageReference = FIRStorage.storage().reference(forURL: "gs://chatchat-rw-cf107.appspot.com")
+  private lazy var userIsTypingRef: FIRDatabaseReference = self.channelRef!.child("typingIndicator").child(self.senderId)
+  private lazy var usersTypingQuery: FIRDatabaseQuery = self.channelRef!.child("typingIndicator").queryOrderedByValue().queryEqual(toValue: true)
+
+  private var newMessageRefHandle: FIRDatabaseHandle?
+  private var updatedMessageRefHandle: FIRDatabaseHandle?
+  
+  private var messages: [JSQMessage] = []
+  private var photoMessageMap = [String: JSQPhotoMediaItem]()
+  
+  private var localTyping = false
+  var channel: Channel? {
+    didSet {
+      title = channel?.name
+    }
+  }
+
+  var isTyping: Bool {
+    get {
+      return localTyping
+    }
+    set {
+      localTyping = newValue
+      userIsTypingRef.setValue(newValue)
+    }
+  }
+  
+  lazy var outgoingBubbleImageView: JSQMessagesBubbleImage = self.setupOutgoingBubble()
+  lazy var incomingBubbleImageView: JSQMessagesBubbleImage = self.setupIncomingBubble()
+  
+  /*--------------------------------------------VIEW DID LOAD----------------------------------------*/
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    self.senderId = FIRAuth.auth()?.currentUser?.uid
+    observeMessages()
     
-    let saveAction = UIAlertAction(title: "Save", style: .default) { action in
-        let emailField = alert.textFields![0] 
-        let passwordField = alert.textFields![1] 
-      
-        FIRAuth.auth()!.createUser(withEmail: emailField.text!, password: passwordField.text!) { user, error in
-          if error == nil {
-            FIRAuth.auth()!.signIn(withEmail: self.textFieldLoginEmail.text!, password: self.textFieldLoginPassword.text!)
+    // No avatars
+    collectionView!.collectionViewLayout.incomingAvatarViewSize = CGSize.zero
+    collectionView!.collectionViewLayout.outgoingAvatarViewSize = CGSize.zero
+  }
+  
+  /*--------------------------------------------VIEW DID APPEAR----------------------------------------*/
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    observeTyping()
+  }
+  
+  deinit {
+    if let refHandle = newMessageRefHandle {
+      messageRef.removeObserver(withHandle: refHandle)
+    }
+    if let refHandle = updatedMessageRefHandle {
+      messageRef.removeObserver(withHandle: refHandle)
+    }
+  }
+  
+  
+  /*--------------------------------------------COLLECTION VIEW----------------------------------------*/
+  override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
+    return messages[indexPath.item]
+  }
+  
+  override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return messages.count
+  }
+  
+  override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
+    let message = messages[indexPath.item] // 1
+    if message.senderId == senderId { // 2
+      return outgoingBubbleImageView
+    } else { // 3
+      return incomingBubbleImageView
+    }
+  }
+  
+  override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
+    
+    let message = messages[indexPath.item]
+    
+    if message.senderId == senderId { // 1
+      cell.textView?.textColor = UIColor.white // 2
+    } else {
+      cell.textView?.textColor = UIColor.black // 3
+    }
+    
+    return cell
+  }
+  
+  override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
+    return nil
+  }
+  
+  override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForMessageBubbleTopLabelAt indexPath: IndexPath!) -> CGFloat {
+    return 15
+  }
+  
+  override func collectionView(_ collectionView: JSQMessagesCollectionView?, attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!) -> NSAttributedString? {
+    let message = messages[indexPath.item]
+    switch message.senderId {
+    case senderId:
+      return nil
+    default:
+      guard let senderDisplayName = message.senderDisplayName else {
+        assertionFailure()
+        return nil
+      }
+      return NSAttributedString(string: senderDisplayName)
+    }
+  }
+
+ 
+    
+/*------------------F--------------------------OBSERVE MESSAGES----------------------------------------*/
+  private func observeMessages() {
+    messageRef = channelRef!.child("messages")
+    let messageQuery = messageRef.queryLimited(toLast:25)
+    
+    // We can use the observe method to listen for new
+    // messages being written to the Firebase DB
+    newMessageRefHandle = messageQuery.observe(.childAdded, with: { (snapshot) -> Void in
+      let messageData = snapshot.value as! Dictionary<String, String>
+
+      if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.characters.count > 0 {
+        self.addMessage(withId: id, name: name, text: text)
+        self.finishReceivingMessage()
+      } else if let id = messageData["senderId"] as String!, let photoURL = messageData["photoURL"] as String! {
+        if let mediaItem = JSQPhotoMediaItem(maskAsOutgoing: id == self.senderId) {
+          self.addPhotoMessage(withId: id, key: snapshot.key, mediaItem: mediaItem)
+          
+          if photoURL.hasPrefix("gs://") {
+            self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: nil)
           }
         }
-    }
-    
-    let cancelAction = UIAlertAction(title: "Cancel", style: .default)
-    
-    alert.addTextField { textEmail in
-      textEmail.placeholder = "Enter your email"
-    }
-    
-    alert.addTextField { textPassword in
-      textPassword.isSecureTextEntry = true
-      textPassword.placeholder = "Enter your password"
-    }
-    
-    alert.addAction(saveAction)
-    alert.addAction(cancelAction)
-    
-    present(alert, animated: true, completion: nil)
-  }
-
-}
-
-
-
-/*-------------------------------TEXTFIELD DELEGATE EXTENSION---------------------------*/
-extension LoginViewController: UITextFieldDelegate {
-  
-  func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-    if textField == textFieldLoginEmail {
-      textFieldLoginPassword.becomeFirstResponder()
-    }
-    if textField == textFieldLoginPassword {
-      textField.resignFirstResponder()
-    }
-    return true
-  }
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import UIKit
-
-class GroceryListTableViewController: UITableViewController {
-
-  let listToUsers = "ListToUsers"
-  var items: [GroceryItem] = []
-  let ref = FIRDatabase.database().reference(withPath: "grocery-items")
-  let usersRef = FIRDatabase.database().reference(withPath: "online")
-  var user: User!
-  var userCountBarButtonItem: UIBarButtonItem!
-  
-
-  /*-------------------------------VIEW DID LOAD---------------------------
-   1 - order database items by "completed"
-   2 - append databse items to newItems
-   3 - append items to newItems
-   */
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    tableView.allowsMultipleSelectionDuringEditing = false
-    
-    userCountBarButtonItem = UIBarButtonItem(title: "1",
-                                             style: .plain,
-                                             target: self,
-                                             action: #selector(userCountButtonDidTouch))
-    userCountBarButtonItem.tintColor = UIColor.white
-    navigationItem.leftBarButtonItem = userCountBarButtonItem
-    
-    usersRef.observe(.value, with: { snapshot in
-      if snapshot.exists() {
-        self.userCountBarButtonItem?.title = snapshot.childrenCount.description
       } else {
-        self.userCountBarButtonItem?.title = "0"
+        print("Error! Could not decode message data")
       }
     })
     
-    //1
-    ref.queryOrdered(byChild: "completed").observe(.value, with: { snapshot in
-      var newItems: [GroceryItem] = []
+    // We can also use the observer method to listen for
+    // changes to existing messages.
+    // We use this to be notified when a photo has been stored
+    // to the Firebase Storage, so we can update the message data
+    updatedMessageRefHandle = messageRef.observe(.childChanged, with: { (snapshot) in
+      let key = snapshot.key
+      let messageData = snapshot.value as! Dictionary<String, String>
       
-      //2
-      for item in snapshot.children {
-        let groceryItem = GroceryItem(snapshot: item as! FIRDataSnapshot)
-        newItems.append(groceryItem)
-      }
-      
-      //3
-      self.items = newItems
-      self.tableView.reloadData()
-    })
-    
-    FIRAuth.auth()!.addStateDidChangeListener { auth, user in
-      guard let user = user else { return }
-      self.user = User(authData: user)
-      let currentUserRef = self.usersRef.child(self.user.uid)
-      currentUserRef.setValue(self.user.email)
-      currentUserRef.onDisconnectRemoveValue()
-    }
-  }
-  
-  
-  /*-------------------------------TABLEVIEW METHODS--------------------------*/
-  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return items.count
-  }
-  
-  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
-    let groceryItem = items[indexPath.row]
-    
-    cell.textLabel?.text = groceryItem.name
-    cell.detailTextLabel?.text = groceryItem.addedByUser
-    
-    toggleCellCheckbox(cell, isCompleted: groceryItem.completed)
-    
-    return cell
-  }
-  
-  override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-    return true
-  }
-  
-  override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-    if editingStyle == .delete {
-      let groceryItem = items[indexPath.row]
-      groceryItem.ref?.removeValue()
-    }
-  }
-  
-  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    guard let cell = tableView.cellForRow(at: indexPath) else { return }
-    let groceryItem = items[indexPath.row]
-    let toggledCompletion = !groceryItem.completed
-    toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-    groceryItem.ref?.updateChildValues([
-      "completed": toggledCompletion
-    ])
-  }
-  
-  
-  
-  /*-------------------------------TOOGLE CELL CHECKBOX (check / uncheck an item)--------------------------*/
-  func toggleCellCheckbox(_ cell: UITableViewCell, isCompleted: Bool) {
-    if !isCompleted {
-      cell.accessoryType = .none
-      cell.textLabel?.textColor = UIColor.black
-      cell.detailTextLabel?.textColor = UIColor.black
-    } else {
-      cell.accessoryType = .checkmark
-      cell.textLabel?.textColor = UIColor.gray
-      cell.detailTextLabel?.textColor = UIColor.gray
-    }
-  }
-  
-  /*-------------------------------------------------ADD ITEM------------------------------------------------*/
-  @IBAction func addButtonDidTouch(_ sender: AnyObject) {
-    let alert = UIAlertController(title: "Grocery Item",
-                                  message: "Add an Item",
-                                  preferredStyle: .alert)
-    
-    let saveAction = UIAlertAction(title: "Save",
-                                   style: .default) { _ in
-                                    // 1
-                                    guard let textField = alert.textFields?.first,
-                                      let text = textField.text else { return }
-
-                                    // 2
-                                    let groceryItem = GroceryItem(name: text,
-                                                                  addedByUser: self.user.email,
-                                                                  completed: false)
-                                    // 3
-                                    let groceryItemRef = self.ref.child(text.lowercased())
-
-                                    // 4
-                                    groceryItemRef.setValue(groceryItem.toAnyObject())
-    }
-    
-    let cancelAction = UIAlertAction(title: "Cancel",
-                                     style: .default)
-    
-    alert.addTextField()
-    
-    alert.addAction(saveAction)
-    alert.addAction(cancelAction)
-    
-    present(alert, animated: true, completion: nil)
-  }
-  
-  func userCountButtonDidTouch() {
-    performSegue(withIdentifier: listToUsers, sender: nil)
-  }
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import UIKit
-
-class OnlineUsersTableViewController: UITableViewController {
-
-  let userCell = "UserCell"
-  let usersRef = FIRDatabase.database().reference(withPath: "online")
-  var currentUsers: [String] = []
-  
-
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    /*-------------------------------USERS REF OBSERVE---------------1----------*/
-    usersRef.observe(.childAdded, with: { snap in
-      guard let email = snap.value as? String else { return }
-      self.currentUsers.append(email)
-      let row = self.currentUsers.count - 1
-      let indexPath = IndexPath(row: row, section: 0)
-      self.tableView.insertRows(at: [indexPath], with: .top)
-    })
-    
-    
-    /*-------------------------------USERS REF OBSERVE---------------2----------*/
-    usersRef.observe(.childRemoved, with: { snap in
-      guard let emailToFind = snap.value as? String else { return }
-      for (index, email) in self.currentUsers.enumerated() {
-        if email == emailToFind {
-          let indexPath = IndexPath(row: index, section: 0)
-          self.currentUsers.remove(at: index)
-          self.tableView.deleteRows(at: [indexPath], with: .fade)
+      if let photoURL = messageData["photoURL"] as String! {
+        // The photo has been updated.
+        if let mediaItem = self.photoMessageMap[key] {
+          self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: key)
         }
       }
     })
+  }
+  
     
-  }
-  
-  /*-------------------------------TABLEVIEW METHODS--------------------------*/
-  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return currentUsers.count
-  }
-  
-  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: userCell, for: indexPath)
-    let onlineUserEmail = currentUsers[indexPath.row]
-    cell.textLabel?.text = onlineUserEmail
-    return cell
-  }
-  
-  /*-----------------------------------SIGN OUT--------------------------------*/
-  @IBAction func signoutButtonPressed(_ sender: AnyObject) {
-    do {
-      try FIRAuth.auth()!.signOut()
-      dismiss(animated: true, completion: nil)
-    } catch {
+  /*-----------------F---------------------------FETCH IMAGE DATA----------------------------------------*/
+  private func fetchImageDataAtURL(_ photoURL: String, forMediaItem mediaItem: JSQPhotoMediaItem, clearsPhotoMessageMapOnSuccessForKey key: String?) {
+    let storageRef = FIRStorage.storage().reference(forURL: photoURL)
+    storageRef.data(withMaxSize: INT64_MAX){ (data, error) in
+      if let error = error {
+        print("Error downloading image data: \(error)")
+        return
+      }
       
+      storageRef.metadata(completion: { (metadata, metadataErr) in
+        if let error = metadataErr {
+          print("Error downloading metadata: \(error)")
+          return
+        }
+        
+        if (metadata?.contentType == "image/gif") {
+          mediaItem.image = UIImage.gifWithData(data!)
+        } else {
+          mediaItem.image = UIImage.init(data: data!)
+        }
+        self.collectionView.reloadData()
+        
+        guard key != nil else {
+          return
+        }
+        self.photoMessageMap.removeValue(forKey: key!)
+      })
     }
   }
   
+    
+  /*----------------F----------------------------OBSERVE TYPING----------------------------------------*/
+  private func observeTyping() {
+    let typingIndicatorRef = channelRef!.child("typingIndicator")
+    userIsTypingRef = typingIndicatorRef.child(senderId)
+    userIsTypingRef.onDisconnectRemoveValue()
+    usersTypingQuery = typingIndicatorRef.queryOrderedByValue().queryEqual(toValue: true)
+    
+    usersTypingQuery.observe(.value) { (data: FIRDataSnapshot) in
+      
+      // You're the only typing, don't show the indicator
+      if data.childrenCount == 1 && self.isTyping {
+        return
+      }
+      
+      // Are there others typing?
+      self.showTypingIndicator = data.childrenCount > 0
+      self.scrollToBottom(animated: true)
+    }
+  }
+  
+    
+  /*--------------------------------------------SEND-----------------1-----------------------*/
+  override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
+    // 1
+    let itemRef = messageRef.childByAutoId()
+    
+    // 2
+    let messageItem = [
+      "senderId": senderId!,
+      "senderName": senderDisplayName!,
+      "text": text!,
+    ]
+    
+    // 3
+    itemRef.setValue(messageItem)
+    
+    // 4
+    JSQSystemSoundPlayer.jsq_playMessageSentSound()
+    
+    // 5
+    finishSendingMessage()
+    isTyping = false
+    }
+  
+    
+  /*--------------------------------------------SEND------------------2----------------------*/
+  func sendPhotoMessage() -> String? {
+    let itemRef = messageRef.childByAutoId()
+    
+    let messageItem = [
+      "photoURL": imageURLNotSetKey,
+      "senderId": senderId!,
+      ]
+    
+    itemRef.setValue(messageItem)
+    
+    JSQSystemSoundPlayer.jsq_playMessageSentSound()
+    
+    finishSendingMessage()
+    return itemRef.key
+  }
+  
+  func setImageURL(_ url: String, forPhotoMessageWithKey key: String) {
+    let itemRef = messageRef.child(key)
+    itemRef.updateChildValues(["photoURL": url])
+  }
+  
+ 
+    
+  /*--------------------------------------------UI----------------------------------------*/
+  private func setupOutgoingBubble() -> JSQMessagesBubbleImage {
+    let bubbleImageFactory = JSQMessagesBubbleImageFactory()
+    return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.jsq_messageBubbleBlue())
+  }
+
+  private func setupIncomingBubble() -> JSQMessagesBubbleImage {
+    let bubbleImageFactory = JSQMessagesBubbleImageFactory()
+    return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.jsq_messageBubbleLightGray())
+  }
+
+  override func didPressAccessoryButton(_ sender: UIButton) {
+    let picker = UIImagePickerController()
+    picker.delegate = self
+    if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
+      picker.sourceType = UIImagePickerControllerSourceType.camera
+    } else {
+      picker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+    }
+    
+    present(picker, animated: true, completion:nil)
+  }
+  
+    
+  /*--------------------------------------------ADD MESSSAGES----------------------------------------*/
+  private func addMessage(withId id: String, name: String, text: String) {
+    if let message = JSQMessage(senderId: id, displayName: name, text: text) {
+      messages.append(message)      
+    }
+  }
+  
+  private func addPhotoMessage(withId id: String, key: String, mediaItem: JSQPhotoMediaItem) {
+    if let message = JSQMessage(senderId: id, displayName: "", media: mediaItem) {
+      messages.append(message)
+      
+      if (mediaItem.image == nil) {
+        photoMessageMap[key] = mediaItem
+      }
+      
+      collectionView.reloadData()
+    }
+  }
+ 
+    
+
+  override func textViewDidChange(_ textView: UITextView) {
+    super.textViewDidChange(textView)
+    // If the text is not empty, the user is typing
+    isTyping = textView.text != ""
+  }
 }
 
 
+
+
+  /*--------------------------------------------IMPC----------------------------------------
+ 1 ....
+ 2
+ 3
+ 4
+ 5
+ 6
+ */
+
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+  func imagePickerController(_ picker: UIImagePickerController,
+                             didFinishPickingMediaWithInfo info: [String : Any]) {
+
+    picker.dismiss(animated: true, completion:nil)
+
+    // 1
+    if let photoReferenceUrl = info[UIImagePickerControllerReferenceURL] as? URL {
+      // Handle picking a Photo from the Photo Library
+      // 2
+      let assets = PHAsset.fetchAssets(withALAssetURLs: [photoReferenceUrl], options: nil)
+      let asset = assets.firstObject
+
+      // 3
+      if let key = sendPhotoMessage() {
+        // 4
+        asset?.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, info) in
+          let imageFileURL = contentEditingInput?.fullSizeImageURL
+
+          // 5
+          let path = "\(FIRAuth.auth()?.currentUser?.uid)/\(Int(Date.timeIntervalSinceReferenceDate * 1000))/\(photoReferenceUrl.lastPathComponent)"
+
+          // 6
+          self.storageRef.child(path).putFile(imageFileURL!, metadata: nil) { (metadata, error) in
+            if let error = error {
+              print("Error uploading photo: \(error.localizedDescription)")
+              return
+            }
+            // 7
+            self.setImageURL(self.storageRef.child((metadata?.path)!).description, forPhotoMessageWithKey: key)
+          }
+        })
+      }
+    } else {
+      // Handle picking a Photo from the Camera - TODO
+    }
+  }
+
+  func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    picker.dismiss(animated: true, completion:nil)
+  }
+}
