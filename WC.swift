@@ -1,19 +1,4 @@
 /*
- * Copyright (c) 2015 Razeware LLC
- */
-
-internal class Channel {
-  internal let id: String
-  internal let name: String
-  
-  init(id: String, name: String) {
-    self.id = id
-    self.name = name
-  }
-}
-
-
-/*
 * Copyright (c) 2015 Razeware LLC
 */
 
@@ -25,33 +10,22 @@ class LoginViewController: UIViewController {
   // VARIABLES, PROPERTIES
   @IBOutlet weak var nameField: UITextField!
   @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
-
-
-   /*-------------------------------------VIEW WILL APPERAR / DISAPPEAR-----------------------*/
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShowNotification(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-    NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHideNotification(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-  }
-  
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-    NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-  }
+    
+ 
   
   /*--------------------------------------------LOGIN----------------------------------------*/
   @IBAction func loginDidTouch(_ sender: AnyObject) {
-    if nameField?.text != "" {
-      FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
-        if let err:Error = error {
-          print(err.localizedDescription)
-          return
+   
+    if nameField.text != ""{
+    FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
+        if let err:Error = error{
+        print(err.localizedDescription)
+            return
         }
-        
         self.performSegue(withIdentifier: "LoginToChat", sender: nil)
-      })
+    })
     }
+       
   }
   
 /*--------------------------------------------PREPARE FOR SEGUE---------------1-----------------*/
@@ -62,16 +36,6 @@ class LoginViewController: UIViewController {
     channelVc.senderDisplayName = nameField?.text
   }
   
-/*--------------------------------------------NOTIFICATIONS----------------------------------------*/
-  func keyboardWillShowNotification(_ notification: Notification) {
-    let keyboardEndFrame = ((notification as NSNotification).userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-    let convertedKeyboardEndFrame = view.convert(keyboardEndFrame, from: view.window)
-    bottomLayoutGuideConstraint.constant = view.bounds.maxY - convertedKeyboardEndFrame.minY
-  }
-  
-  func keyboardWillHideNotification(_ notification: Notification) {
-    bottomLayoutGuideConstraint.constant = 48
-  }
 }
 
 
@@ -206,6 +170,19 @@ class ChannelListViewController: UITableViewController {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 * Copyright (c) 2015 Razeware LLC
 */
@@ -225,9 +202,8 @@ final class ChatViewController: JSQMessagesViewController {
   private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
   fileprivate lazy var storageRef: FIRStorageReference = FIRStorage.storage().reference(forURL: "gs://chatchat-rw-cf107.appspot.com")
   private lazy var userIsTypingRef: FIRDatabaseReference = self.channelRef!.child("typingIndicator").child(self.senderId)
-  private lazy var usersTypingQuery: FIRDatabaseQuery = self.channelRef!.child("typingIndicator").queryOrderedByValue().queryEqual(toValue: true)
-
-  private var newMessageRefHandle: FIRDatabaseHandle?
+ 
+private var newMessageRefHandle: FIRDatabaseHandle?
   private var updatedMessageRefHandle: FIRDatabaseHandle?
   
   private var messages: [JSQMessage] = []
@@ -240,15 +216,7 @@ final class ChatViewController: JSQMessagesViewController {
     }
   }
 
-  var isTyping: Bool {
-    get {
-      return localTyping
-    }
-    set {
-      localTyping = newValue
-      userIsTypingRef.setValue(newValue)
-    }
-  }
+ 
   
   lazy var outgoingBubbleImageView: JSQMessagesBubbleImage = self.setupOutgoingBubble()
   lazy var incomingBubbleImageView: JSQMessagesBubbleImage = self.setupIncomingBubble()
@@ -267,7 +235,6 @@ final class ChatViewController: JSQMessagesViewController {
   /*--------------------------------------------VIEW DID APPEAR----------------------------------------*/
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    observeTyping()
   }
   
   deinit {
@@ -411,48 +378,25 @@ final class ChatViewController: JSQMessagesViewController {
   }
   
     
-  /*----------------F----------------------------OBSERVE TYPING----------------------------------------*/
-  private func observeTyping() {
-    let typingIndicatorRef = channelRef!.child("typingIndicator")
-    userIsTypingRef = typingIndicatorRef.child(senderId)
-    userIsTypingRef.onDisconnectRemoveValue()
-    usersTypingQuery = typingIndicatorRef.queryOrderedByValue().queryEqual(toValue: true)
-    
-    usersTypingQuery.observe(.value) { (data: FIRDataSnapshot) in
-      
-      // You're the only typing, don't show the indicator
-      if data.childrenCount == 1 && self.isTyping {
-        return
-      }
-      
-      // Are there others typing?
-      self.showTypingIndicator = data.childrenCount > 0
-      self.scrollToBottom(animated: true)
-    }
-  }
+//Observe typing
   
     
   /*--------------------------------------------SEND-----------------1-----------------------*/
   override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-    // 1
+   
+    
     let itemRef = messageRef.childByAutoId()
     
-    // 2
     let messageItem = [
-      "senderId": senderId!,
-      "senderName": senderDisplayName!,
-      "text": text!,
+        "senderId" : senderId!,
+        "senderName" : senderDisplayName!,
+        "text": text!
     ]
     
-    // 3
     itemRef.setValue(messageItem)
-    
-    // 4
     JSQSystemSoundPlayer.jsq_playMessageSentSound()
     
-    // 5
     finishSendingMessage()
-    isTyping = false
     }
   
     
@@ -523,20 +467,13 @@ final class ChatViewController: JSQMessagesViewController {
     }
   }
  
-    
-
-  override func textViewDidChange(_ textView: UITextView) {
-    super.textViewDidChange(textView)
-    // If the text is not empty, the user is typing
-    isTyping = textView.text != ""
-  }
 }
 
 
 
 
   /*--------------------------------------------IMPC----------------------------------------
- 1 ....
+ 1
  2
  3
  4
