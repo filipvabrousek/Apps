@@ -203,7 +203,7 @@ final class ChatViewController: JSQMessagesViewController {
   fileprivate lazy var storageRef: FIRStorageReference = FIRStorage.storage().reference(forURL: "gs://chatchat-rw-cf107.appspot.com")
   private lazy var userIsTypingRef: FIRDatabaseReference = self.channelRef!.child("typingIndicator").child(self.senderId)
  
-private var newMessageRefHandle: FIRDatabaseHandle?
+  private var newMessageRefHandle: FIRDatabaseHandle?
   private var updatedMessageRefHandle: FIRDatabaseHandle?
   
   private var messages: [JSQMessage] = []
