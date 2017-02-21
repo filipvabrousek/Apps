@@ -41,6 +41,9 @@ class LoginViewController: UIViewController {
 
 
 
+
+
+
 /*
 Copyright (c) 2015 Razeware LLC
  */
@@ -171,18 +174,6 @@ class ChannelListViewController: UITableViewController {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 * Copyright (c) 2015 Razeware LLC
 */
@@ -247,7 +238,10 @@ final class ChatViewController: JSQMessagesViewController {
   }
   
   
-  /*--------------------------------------------COLLECTION VIEW----------------------------------------*/
+  /*--------------------------------------------COLLECTION VIEW----------------------------------------
+1 - change bubble views
+2 - change text color
+*/
   override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
     return messages[indexPath.item]
   }
@@ -257,23 +251,25 @@ final class ChatViewController: JSQMessagesViewController {
   }
   
   override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
-    let message = messages[indexPath.item] // 1
-    if message.senderId == senderId { // 2
+    let message = messages[indexPath.item]
+   //1
+    if message.senderId == senderId {
       return outgoingBubbleImageView
-    } else { // 3
+    } else {
       return incomingBubbleImageView
     }
   }
   
+    
   override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
     
     let message = messages[indexPath.item]
-    
-    if message.senderId == senderId { // 1
-      cell.textView?.textColor = UIColor.white // 2
+    //2
+    if message.senderId == senderId {
+      cell.textView?.textColor = UIColor.white
     } else {
-      cell.textView?.textColor = UIColor.black // 3
+      cell.textView?.textColor = UIColor.black
     }
     
     return cell
@@ -303,23 +299,33 @@ final class ChatViewController: JSQMessagesViewController {
 
  
     
-/*------------------F--------------------------OBSERVE MESSAGES----------------------------------------*/
+/*------------------F--------------------------OBSERVE MESSAGES----------------------------------------
+1 - listen for new messages being written to the Firebase DB
+2 - add the message using addMessage()
+3 - add the photo message using addPhotoMessage
+4 - listen for changes to existing messages
+we use this to be notified when a photo has been stored (update the message data)
+     
+*/
   private func observeMessages() {
     messageRef = channelRef!.child("messages")
     let messageQuery = messageRef.queryLimited(toLast:25)
     
-    // We can use the observe method to listen for new
-    // messages being written to the Firebase DB
+    //1
     newMessageRefHandle = messageQuery.observe(.childAdded, with: { (snapshot) -> Void in
       let messageData = snapshot.value as! Dictionary<String, String>
 
       if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.characters.count > 0 {
+        //2
         self.addMessage(withId: id, name: name, text: text)
-        self.finishReceivingMessage()
-      } else if let id = messageData["senderId"] as String!, let photoURL = messageData["photoURL"] as String! {
+      }
+      
+      
+      else if let id = messageData["senderId"] as String!, let photoURL = messageData["photoURL"] as String! {
         if let mediaItem = JSQPhotoMediaItem(maskAsOutgoing: id == self.senderId) {
-          self.addPhotoMessage(withId: id, key: snapshot.key, mediaItem: mediaItem)
-          
+         //3
+            self.addPhotoMessage(withId: id, key: snapshot.key, mediaItem: mediaItem)
+            
           if photoURL.hasPrefix("gs://") {
             self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: nil)
           }
@@ -329,10 +335,7 @@ final class ChatViewController: JSQMessagesViewController {
       }
     })
     
-    // We can also use the observer method to listen for
-    // changes to existing messages.
-    // We use this to be notified when a photo has been stored
-    // to the Firebase Storage, so we can update the message data
+    //4
     updatedMessageRefHandle = messageRef.observe(.childChanged, with: { (snapshot) in
       let key = snapshot.key
       let messageData = snapshot.value as! Dictionary<String, String>
@@ -377,8 +380,6 @@ final class ChatViewController: JSQMessagesViewController {
     }
   }
   
-    
-//Observe typing
   
     
   /*--------------------------------------------SEND-----------------1-----------------------*/
@@ -417,6 +418,7 @@ final class ChatViewController: JSQMessagesViewController {
     return itemRef.key
   }
   
+/*--------------------------------------------SET IMAGE URL-----------------------------------*/
   func setImageURL(_ url: String, forPhotoMessageWithKey key: String) {
     let itemRef = messageRef.child(key)
     itemRef.updateChildValues(["photoURL": url])
@@ -424,10 +426,10 @@ final class ChatViewController: JSQMessagesViewController {
   
  
     
-  /*--------------------------------------------UI----------------------------------------*/
+  /*-----------------------------------SETUP BUBBLES AND THEIR COLORS---------------------------*/
   private func setupOutgoingBubble() -> JSQMessagesBubbleImage {
     let bubbleImageFactory = JSQMessagesBubbleImageFactory()
-    return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.jsq_messageBubbleBlue())
+    return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.jsq_messageBubbleGreen())
   }
 
   private func setupIncomingBubble() -> JSQMessagesBubbleImage {
@@ -435,6 +437,7 @@ final class ChatViewController: JSQMessagesViewController {
     return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.jsq_messageBubbleLightGray())
   }
 
+/*------------------------------------------PICKING AN IMAGE-----------------------------------------*/
   override func didPressAccessoryButton(_ sender: UIButton) {
     let picker = UIImagePickerController()
     picker.delegate = self
@@ -448,7 +451,7 @@ final class ChatViewController: JSQMessagesViewController {
   }
   
     
-  /*--------------------------------------------ADD MESSSAGES----------------------------------------*/
+  /*--------------------------------------------ADD MESSSAGE----------------------------------------*/
   private func addMessage(withId id: String, name: String, text: String) {
     if let message = JSQMessage(senderId: id, displayName: name, text: text) {
       messages.append(message)      
@@ -473,53 +476,60 @@ final class ChatViewController: JSQMessagesViewController {
 
 
   /*--------------------------------------------IMPC----------------------------------------
- 1
- 2
- 3
- 4
- 5
- 6
+ 1 - Retrieve assets from the URL
+ 2 - get the FirebaseKey from sendPhotoMessage()
+ 3 - get the file URL
+ 4 - create a unique path based on the user’s unique ID and the current time
+ 5 - save image to the Firebase storage
+ 6 - call setImageURL() to update your photo message with the correct URL
  */
 
 extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-  func imagePickerController(_ picker: UIImagePickerController,
-                             didFinishPickingMediaWithInfo info: [String : Any]) {
+  func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
 
+    
     picker.dismiss(animated: true, completion:nil)
 
-    // 1
+    
     if let photoReferenceUrl = info[UIImagePickerControllerReferenceURL] as? URL {
-      // Handle picking a Photo from the Photo Library
-      // 2
+     
+      // 1
       let assets = PHAsset.fetchAssets(withALAssetURLs: [photoReferenceUrl], options: nil)
       let asset = assets.firstObject
 
-      // 3
+      // 2
       if let key = sendPhotoMessage() {
-        // 4
+        // 3
         asset?.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, info) in
           let imageFileURL = contentEditingInput?.fullSizeImageURL
 
-          // 5
+          // 4
           let path = "\(FIRAuth.auth()?.currentUser?.uid)/\(Int(Date.timeIntervalSinceReferenceDate * 1000))/\(photoReferenceUrl.lastPathComponent)"
 
-          // 6
+          // 5
           self.storageRef.child(path).putFile(imageFileURL!, metadata: nil) { (metadata, error) in
             if let error = error {
               print("Error uploading photo: \(error.localizedDescription)")
               return
             }
-            // 7
+            // 6
             self.setImageURL(self.storageRef.child((metadata?.path)!).description, forPhotoMessageWithKey: key)
           }
         })
       }
-    } else {
-      // Handle picking a Photo from the Camera - TODO
     }
-  }
+    }
 
   func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
     picker.dismiss(animated: true, completion:nil)
   }
 }
+
+
+
+
+
+
+
+
+
