@@ -1,169 +1,792 @@
-/*
-* Copyright (c) 2015 Razeware LLC
-*/
+
+
+import UIKit
+
+
+class LandingVC: UIViewController {
+    
+    //MARK: Properties
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        get {
+            return UIInterfaceOrientationMask.portrait
+        }
+    }
+
+    //MARK: Push to relevant ViewController
+    func pushTo(viewController: ViewControllerType)  {
+        switch viewController {
+        case .conversations:
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "Navigation") as! NavVC
+            self.present(vc, animated: false, completion: nil)
+        case .welcome:
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "Welcome") as! WelcomeVC
+            self.present(vc, animated: false, completion: nil)
+        }
+    }
+    
+    //MARK: Check if user is signed in or not
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let userInformation = UserDefaults.standard.dictionary(forKey: "userInformation") {
+            let email = userInformation["email"] as! String
+            let password = userInformation["password"] as! String
+            User.loginUser(withEmail: email, password: password, completion: { [weak weakSelf = self] (status) in
+                DispatchQueue.main.async {
+                    if status == true {
+                        weakSelf?.pushTo(viewController: .conversations)
+                    } else {
+                        weakSelf?.pushTo(viewController: .welcome)
+                    }
+                    weakSelf = nil
+                }
+            })
+        } else {
+            self.pushTo(viewController: .welcome)
+        }
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import UIKit
+import Photos
+
+class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+
+    //MARK: Properties
+    @IBOutlet weak var darkView: UIView!
+    @IBOutlet weak var spinner: UIActivityIndicatorView!
+    @IBOutlet var registerView: UIView!
+    @IBOutlet var loginView: UIView!
+    @IBOutlet weak var profilePicView: RoundedImageView!
+    @IBOutlet weak var registerNameField: UITextField!
+    @IBOutlet weak var registerEmailField: UITextField!
+    @IBOutlet weak var registerPasswordField: UITextField!
+    @IBOutlet var waringLabels: [UILabel]!
+    @IBOutlet weak var loginEmailField: UITextField!
+    @IBOutlet weak var loginPasswordField: UITextField!
+    @IBOutlet weak var cloudsView: UIImageView!
+    @IBOutlet weak var cloudsViewLeading: NSLayoutConstraint!
+    @IBOutlet var inputFields: [UITextField]!
+    var loginViewTopConstraint: NSLayoutConstraint!
+    var registerTopConstraint: NSLayoutConstraint!
+    let imagePicker = UIImagePickerController()
+    var isLoginViewVisible = true
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        get {
+            return UIInterfaceOrientationMask.portrait
+        }
+    }
+    
+    //MARK: Methods
+    func customization()  {
+        self.darkView.alpha = 0
+        self.imagePicker.delegate = self
+        self.profilePicView.layer.borderColor = GlobalVariables.blue.cgColor
+        self.profilePicView.layer.borderWidth = 2
+        //LoginView customization
+        self.view.insertSubview(self.loginView, belowSubview: self.cloudsView)
+        self.loginView.translatesAutoresizingMaskIntoConstraints = false
+        self.loginView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        self.loginViewTopConstraint = NSLayoutConstraint.init(item: self.loginView, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 60)
+        self.loginViewTopConstraint.isActive = true
+        self.loginView.heightAnchor.constraint(equalTo: self.view.heightAnchor, multiplier: 0.45).isActive = true
+        self.loginView.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 0.8).isActive = true
+        self.loginView.layer.cornerRadius = 8
+        //RegisterView Customization
+        self.view.insertSubview(self.registerView, belowSubview: self.cloudsView)
+        self.registerView.translatesAutoresizingMaskIntoConstraints = false
+        self.registerView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        self.registerTopConstraint = NSLayoutConstraint.init(item: self.registerView, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 1000)
+        self.registerTopConstraint.isActive = true
+        self.registerView.heightAnchor.constraint(equalTo: self.view.heightAnchor, multiplier: 0.6).isActive = true
+        self.registerView.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 0.8).isActive = true
+        self.registerView.layer.cornerRadius = 8
+    }
+   
+    func cloundsAnimation() {
+        let distance = self.view.bounds.width - self.cloudsView.bounds.width
+        self.cloudsViewLeading.constant = distance
+        UIView.animate(withDuration: 15, delay: 0, options: [.repeat, .curveLinear], animations: {
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    func showLoading(state: Bool)  {
+        if state {
+            self.darkView.isHidden = false
+            self.spinner.startAnimating()
+            UIView.animate(withDuration: 0.3, animations: { 
+                self.darkView.alpha = 0.5
+            })
+        } else {
+            UIView.animate(withDuration: 0.3, animations: { 
+                self.darkView.alpha = 0
+            }, completion: { _ in
+                self.spinner.stopAnimating()
+                self.darkView.isHidden = true
+            })
+        }
+    }
+    
+    func pushTomainView() {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "Navigation") as! NavVC
+        self.show(vc, sender: nil)
+    }
+    
+    func openPhotoPickerWith(source: PhotoSource) {
+        switch source {
+        case .camera:
+            let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+            if (status == .authorized || status == .notDetermined) {
+                self.imagePicker.sourceType = .camera
+                self.imagePicker.allowsEditing = true
+                self.present(self.imagePicker, animated: true, completion: nil)
+            }
+        case .library:
+            let status = PHPhotoLibrary.authorizationStatus()
+            if (status == .authorized || status == .notDetermined) {
+                self.imagePicker.sourceType = .savedPhotosAlbum
+                self.imagePicker.allowsEditing = true
+                self.present(self.imagePicker, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    @IBAction func switchViews(_ sender: UIButton) {
+        if self.isLoginViewVisible {
+            self.isLoginViewVisible = false
+            sender.setTitle("Login", for: .normal)
+            self.loginViewTopConstraint.constant = 1000
+            self.registerTopConstraint.constant = 60
+        } else {
+            self.isLoginViewVisible = true
+            sender.setTitle("Create New Account", for: .normal)
+            self.loginViewTopConstraint.constant = 60
+            self.registerTopConstraint.constant = 1000
+        }
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+        })
+        for item in self.waringLabels {
+            item.isHidden = true
+        }
+    }
+    
+    @IBAction func register(_ sender: Any) {
+        for item in self.inputFields {
+            item.resignFirstResponder()
+        }
+        self.showLoading(state: true)
+        User.registerUser(withName: self.registerNameField.text!, email: self.registerEmailField.text!, password: self.registerPasswordField.text!, profilePic: self.profilePicView.image!) { [weak weakSelf = self] (status) in
+            DispatchQueue.main.async {
+                weakSelf?.showLoading(state: false)
+                for item in self.inputFields {
+                    item.text = ""
+                }
+                if status == true {
+                    weakSelf?.pushTomainView()
+                    weakSelf?.profilePicView.image = UIImage.init(named: "profile pic")
+                } else {
+                    for item in (weakSelf?.waringLabels)! {
+                        item.isHidden = false
+                    }
+                }
+            }
+        }
+    }
+    
+    @IBAction func login(_ sender: Any) {
+        for item in self.inputFields {
+            item.resignFirstResponder()
+        }
+        self.showLoading(state: true)
+        User.loginUser(withEmail: self.loginEmailField.text!, password: self.loginPasswordField.text!) { [weak weakSelf = self](status) in
+            DispatchQueue.main.async {
+                weakSelf?.showLoading(state: false)
+                for item in self.inputFields {
+                    item.text = ""
+                }
+                if status == true {
+                    weakSelf?.pushTomainView()
+                } else {
+                    for item in (weakSelf?.waringLabels)! {
+                        item.isHidden = false
+                    }
+                }
+                weakSelf = nil
+            }
+        }
+    }
+    
+    @IBAction func selectPic(_ sender: Any) {
+        let sheet = UIAlertController(title: nil, message: "Select the source", preferredStyle: .actionSheet)
+        let cameraAction = UIAlertAction(title: "Camera", style: .default, handler: {
+            (alert: UIAlertAction!) -> Void in
+            self.openPhotoPickerWith(source: .camera)
+        })
+        let photoAction = UIAlertAction(title: "Gallery", style: .default, handler: {
+            (alert: UIAlertAction!) -> Void in
+            self.openPhotoPickerWith(source: .library)
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        sheet.addAction(cameraAction)
+        sheet.addAction(photoAction)
+        sheet.addAction(cancelAction)
+        self.present(sheet, animated: true, completion: nil)
+    }
+    
+    //MARK: Delegates
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        for item in self.waringLabels {
+            item.isHidden = true
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerEditedImage] as? UIImage {
+            self.profilePicView.image = pickedImage
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    //MARK: Viewcontroller lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.customization()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.cloundsAnimation()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.cloudsViewLeading.constant = 0
+        self.cloudsView.layer.removeAllAnimations()
+        self.view.layoutIfNeeded()
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 import UIKit
 import Firebase
+import MapKit
 
-class LoginViewController: UIViewController {
-  
-  // VARIABLES, PROPERTIES
-  @IBOutlet weak var nameField: UITextField!
-  @IBOutlet weak var bottomLayoutGuideConstraint: NSLayoutConstraint!
+class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
+
+    //MARK: Properties
+    @IBOutlet var contactsView: UIView!
+    @IBOutlet var profileView: UIView!
+    @IBOutlet var previewView: UIView!
+    @IBOutlet var mapPreviewView: UIView!
+    @IBOutlet weak var mapVIew: MKMapView!
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var previewImageView: UIImageView!
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var profilePicView: RoundedImageView!
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var emailLabel: UILabel!
+    var topAnchorContraint: NSLayoutConstraint!
+    let darkView = UIView.init()
+    var items = [User]()
     
- 
-  
-  /*--------------------------------------------LOGIN----------------------------------------*/
-  @IBAction func loginDidTouch(_ sender: AnyObject) {
-   
-    if nameField.text != ""{
-    FIRAuth.auth()?.signInAnonymously(completion: { (user, error) in
-        if let err:Error = error{
-        print(err.localizedDescription)
-            return
+    //MARK: Methods
+    func customization() {
+        //DarkView customization
+        self.view.addSubview(self.darkView)
+        self.darkView.backgroundColor = UIColor.black
+        self.darkView.alpha = 0
+        self.darkView.translatesAutoresizingMaskIntoConstraints = false
+        self.darkView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        self.darkView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        self.darkView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        self.darkView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        self.darkView.isHidden = true
+    //ContainerView customization
+        let extraViewsContainer = UIView.init()
+        extraViewsContainer.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(extraViewsContainer)
+        self.topAnchorContraint = NSLayoutConstraint.init(item: extraViewsContainer, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 1000)
+        self.topAnchorContraint.isActive = true
+        extraViewsContainer.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        extraViewsContainer.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        extraViewsContainer.heightAnchor.constraint(equalTo: self.view.heightAnchor, multiplier: 1).isActive = true
+        extraViewsContainer.backgroundColor = UIColor.clear
+    //ContactsView customization
+        extraViewsContainer.addSubview(self.contactsView)
+        self.contactsView.translatesAutoresizingMaskIntoConstraints = false
+        self.contactsView.topAnchor.constraint(equalTo: extraViewsContainer.topAnchor).isActive = true
+        self.contactsView.leadingAnchor.constraint(equalTo: extraViewsContainer.leadingAnchor).isActive = true
+        self.contactsView.trailingAnchor.constraint(equalTo: extraViewsContainer.trailingAnchor).isActive = true
+        self.contactsView.bottomAnchor.constraint(equalTo: extraViewsContainer.bottomAnchor).isActive = true
+        self.contactsView.isHidden = true
+        self.collectionView?.contentInset = UIEdgeInsetsMake(10, 0, 0, 0)
+        self.contactsView.backgroundColor = UIColor.clear
+    //ProfileView Customization
+        extraViewsContainer.addSubview(self.profileView)
+        self.profileView.translatesAutoresizingMaskIntoConstraints = false
+        self.profileView.heightAnchor.constraint(equalToConstant: (UIScreen.main.bounds.width * 0.9)).isActive = true
+        let profileViewAspectRatio = NSLayoutConstraint.init(item: self.profileView, attribute: .width, relatedBy: .equal, toItem: self.profileView, attribute: .height, multiplier: 0.8125, constant: 0)
+        profileViewAspectRatio.isActive = true
+        self.profileView.centerXAnchor.constraint(equalTo: extraViewsContainer.centerXAnchor).isActive = true
+        self.profileView.centerYAnchor.constraint(equalTo: extraViewsContainer.centerYAnchor).isActive = true
+        self.profileView.layer.cornerRadius = 5
+        self.profileView.clipsToBounds = true
+        self.profileView.isHidden = true
+        self.profilePicView.layer.borderColor = GlobalVariables.purple.cgColor
+        self.profilePicView.layer.borderWidth = 3
+        self.view.layoutIfNeeded()
+    //PreviewView Customization
+        extraViewsContainer.addSubview(self.previewView)
+        self.previewView.isHidden = true
+        self.previewView.translatesAutoresizingMaskIntoConstraints = false
+        self.previewView.leadingAnchor.constraint(equalTo: extraViewsContainer.leadingAnchor).isActive = true
+        self.previewView.topAnchor.constraint(equalTo: extraViewsContainer.topAnchor).isActive = true
+        self.previewView.trailingAnchor.constraint(equalTo: extraViewsContainer.trailingAnchor).isActive = true
+        self.previewView.bottomAnchor.constraint(equalTo: extraViewsContainer.bottomAnchor).isActive = true
+        self.scrollView.minimumZoomScale = 1.0
+        self.scrollView.maximumZoomScale = 3.0
+    //MapPreView Customization
+        extraViewsContainer.addSubview(self.mapPreviewView)
+        self.mapPreviewView.isHidden = true
+        self.mapPreviewView.translatesAutoresizingMaskIntoConstraints = false
+        self.mapPreviewView.leadingAnchor.constraint(equalTo: extraViewsContainer.leadingAnchor).isActive = true
+        self.mapPreviewView.topAnchor.constraint(equalTo: extraViewsContainer.topAnchor).isActive = true
+        self.mapPreviewView.trailingAnchor.constraint(equalTo: extraViewsContainer.trailingAnchor).isActive = true
+        self.mapPreviewView.bottomAnchor.constraint(equalTo: extraViewsContainer.bottomAnchor).isActive = true
+        //NotificationCenter for showing extra views
+        NotificationCenter.default.addObserver(self, selector: #selector(self.showExtraViews(notification:)), name: NSNotification.Name(rawValue: "showExtraView"), object: nil)
+        self.fetchUsers()
+        self.fetchUserInfo()
+
+    }
+    
+    //Hide Extra views
+    func dismissExtraViews() {
+        self.topAnchorContraint.constant = 1000
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
+            self.view.layoutIfNeeded()
+            self.darkView.alpha = 0
+            self.view.transform = CGAffineTransform.identity
+        }, completion:  { (true) in
+            self.darkView.isHidden = true
+            self.profileView.isHidden = true
+            self.contactsView.isHidden = true
+            self.previewView.isHidden = true
+            self.mapPreviewView.isHidden = true
+            self.mapVIew.removeAnnotations(self.mapVIew.annotations)
+            let vc = self.viewControllers.last
+            vc?.inputAccessoryView?.isHidden = false
+        })
+    }
+    
+    //Show extra view
+    func showExtraViews(notification: NSNotification)  {
+        let transform = CGAffineTransform.init(scaleX: 0.94, y: 0.94)
+        self.topAnchorContraint.constant = 0
+        self.darkView.isHidden = false
+        if let type = notification.userInfo?["viewType"] as? ShowExtraView {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
+                self.view.layoutIfNeeded()
+                self.darkView.alpha = 0.8
+                if (type == .contacts || type == .profile) {
+                    self.view.transform = transform
+                }
+            })
+            switch type {
+            case .contacts:
+                self.contactsView.isHidden = false
+                if self.items.count == 0 {
+                }
+            case .profile:
+                self.profileView.isHidden = false
+            case .preview:
+                self.previewView.isHidden = false
+                self.previewImageView.image = notification.userInfo?["pic"] as? UIImage
+                self.scrollView.contentSize = self.previewImageView.frame.size
+            case .map:
+                self.mapPreviewView.isHidden = false
+                let coordinate = notification.userInfo?["location"] as? CLLocationCoordinate2D
+                let annotation = MKPointAnnotation.init()
+                annotation.coordinate = coordinate!
+                self.mapVIew.addAnnotation(annotation)
+                self.mapVIew.showAnnotations(self.mapVIew.annotations, animated: false)
+            }
         }
-        self.performSegue(withIdentifier: "LoginToChat", sender: nil)
-    })
+    }
+    
+    //Preview view scrollview's zoom calculation
+    func zoomRectForScale(scale: CGFloat, center: CGPoint) -> CGRect {
+        var zoomRect = CGRect.zero
+        zoomRect.size.height = self.previewImageView.frame.size.height / scale
+        zoomRect.size.width  = self.previewImageView.frame.size.width  / scale
+        let newCenter = self.previewImageView.convert(center, from: self.scrollView)
+        zoomRect.origin.x = newCenter.x - (zoomRect.size.width / 2.0)
+        zoomRect.origin.y = newCenter.y - (zoomRect.size.height / 2.0)
+        return zoomRect
+    }
+    
+    //Downloads users list for Contacts View
+    func fetchUsers()  {
+        if let id = FIRAuth.auth()?.currentUser?.uid {
+            User.downloadAllUsers(exceptID: id, completion: {(user) in
+                DispatchQueue.main.async {
+                    self.items.append(user)
+                    self.collectionView.reloadData()
+                }
+            })
+        }
+    }
+    
+    //Downloads current user credentials
+    func fetchUserInfo() {
+        if let id = FIRAuth.auth()?.currentUser?.uid {
+            User.info(forUserID: id, completion: {[weak weakSelf = self] (user) in
+                DispatchQueue.main.async {
+                    weakSelf?.nameLabel.text = user.name
+                    weakSelf?.emailLabel.text = user.email
+                    weakSelf?.profilePicView.image = user.profilePic
+                    weakSelf = nil
+                }
+            })
+        }
+    }
+    
+    //Extra gesture to allow user double tap for zooming of preview view scrollview
+    @IBAction func doubleTapGesture(_ sender: UITapGestureRecognizer) {
+        if self.scrollView.zoomScale == 1 {
+            self.scrollView.zoom(to: zoomRectForScale(scale: self.scrollView.maximumZoomScale, center: sender.location(in: sender.view)), animated: true)
+        } else {
+            self.scrollView.setZoomScale(1, animated: true)
+        }
+    }
+    
+    @IBAction func closeView(_ sender: Any) {
+        self.dismissExtraViews()
+    }
+  
+    @IBAction func logOutUser(_ sender: Any) {
+        User.logOutUser { (status) in
+            if status == true {
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
+    
+    //MARK: Delegates
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if self.items.count == 0 {
+            return 1
+        } else {
+            return self.items.count
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if self.items.count == 0 {
+            let cell  = collectionView.dequeueReusableCell(withReuseIdentifier: "Empty Cell", for: indexPath)
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! ContactsCVCell
+            cell.profilePic.image = self.items[indexPath.row].profilePic
+            cell.nameLabel.text = self.items[indexPath.row].name
+            cell.profilePic.layer.borderWidth = 2
+            cell.profilePic.layer.borderColor = GlobalVariables.purple.cgColor
+            return cell
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if self.items.count > 0 {
+            self.dismissExtraViews()
+            let userInfo = ["user": self.items[indexPath.row]]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showUserMessages"), object: nil, userInfo: userInfo)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if self.items.count == 0 {
+            return self.collectionView.bounds.size
+        } else {
+            if UIScreen.main.bounds.width > UIScreen.main.bounds.height {
+                let width = (0.3 * UIScreen.main.bounds.height)
+                let height = width + 30
+                return CGSize.init(width: width, height: height)
+            } else {
+                let width = (0.3 * UIScreen.main.bounds.width)
+                let height = width + 30
+                return CGSize.init(width: width, height: height)
+            }
+        }
+    }
+    
+    //Preview view scrollview zooming
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return self.previewImageView
+    }
+
+    //MARK: ViewController lifeCycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.customization()        
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        self.view.transform = CGAffineTransform.identity
+    }    
+}
+
+
+
+
+
+
+
+
+
+import UIKit
+import Firebase
+import AudioToolbox
+
+class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    //MARK: Properties
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var alertBottomConstraint: NSLayoutConstraint!
+    lazy var leftButton: UIBarButtonItem = {
+        let image = UIImage.init(named: "default profile")?.withRenderingMode(.alwaysOriginal)
+        let button  = UIBarButtonItem.init(image: image, style: .plain, target: self, action: #selector(ConversationsVC.showProfile))
+        return button
+    }()
+    var items = [Conversation]()
+    var selectedUser: User?
+    
+    //MARK: Methods
+    func customization()  {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
+        //NavigationBar customization
+        let navigationTitleFont = UIFont(name: "AvenirNext-Regular", size: 18)!
+        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: navigationTitleFont, NSForegroundColorAttributeName: UIColor.white]
+        // notification setup
+        NotificationCenter.default.addObserver(self, selector: #selector(self.pushToUserMesssages(notification:)), name: NSNotification.Name(rawValue: "showUserMessages"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.showEmailAlert), name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
+        //right bar button
+        let icon = UIImage.init(named: "compose")?.withRenderingMode(.alwaysOriginal)
+        let rightButton = UIBarButtonItem.init(image: icon!, style: .plain, target: self, action: #selector(ConversationsVC.showContacts))
+        self.navigationItem.rightBarButtonItem = rightButton
+        //left bar button image fetching
+        self.navigationItem.leftBarButtonItem = self.leftButton
+        self.tableView.tableFooterView = UIView.init(frame: CGRect.zero)
+        if let id = FIRAuth.auth()?.currentUser?.uid {
+            User.info(forUserID: id, completion: { [weak weakSelf = self] (user) in
+                let image = user.profilePic
+                let contentSize = CGSize.init(width: 30, height: 30)
+                UIGraphicsBeginImageContextWithOptions(contentSize, false, 0.0)
+                let _  = UIBezierPath.init(roundedRect: CGRect.init(origin: CGPoint.zero, size: contentSize), cornerRadius: 14).addClip()
+                image.draw(in: CGRect(origin: CGPoint.zero, size: contentSize))
+                let path = UIBezierPath.init(roundedRect: CGRect.init(origin: CGPoint.zero, size: contentSize), cornerRadius: 14)
+                path.lineWidth = 2
+                UIColor.white.setStroke()
+                path.stroke()
+                let finalImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!.withRenderingMode(.alwaysOriginal)
+                UIGraphicsEndImageContext()
+                DispatchQueue.main.async {
+                    weakSelf?.leftButton.image = finalImage
+                    weakSelf = nil
+                }
+            })
+        }
+    }
+    
+    //Downloads conversations
+    func fetchData() {
+        Conversation.showConversations { (conversations) in
+            self.items = conversations
+            self.items.sort{ $0.lastMessage.timestamp > $1.lastMessage.timestamp }
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                for conversation in self.items {
+                    if conversation.lastMessage.isRead == false {
+                        self.playSound()
+                        break
+                    }
+                }
+            }
+        }
+    }
+    
+    //Shows profile extra view
+    func showProfile() {
+        let info = ["viewType" : ShowExtraView.profile]
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showExtraView"), object: nil, userInfo: info)
+        self.inputView?.isHidden = true
+    }
+    
+    //Shows contacts extra view
+    func showContacts() {
+        let info = ["viewType" : ShowExtraView.contacts]
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showExtraView"), object: nil, userInfo: info)
+    }
+    
+    //Show EmailVerification on the bottom
+    func showEmailAlert() {
+        User.checkUserVerification {[weak weakSelf = self] (status) in
+            status == true ? (weakSelf?.alertBottomConstraint.constant = -40) : (weakSelf?.alertBottomConstraint.constant = 0)
+            UIView.animate(withDuration: 0.3) {
+                weakSelf?.view.layoutIfNeeded()
+                weakSelf = nil
+            }
+        }
+    }
+    
+    //Shows Chat viewcontroller with given user
+    func pushToUserMesssages(notification: NSNotification) {
+        if let user = notification.userInfo?["user"] as? User {
+            self.selectedUser = user
+            self.performSegue(withIdentifier: "segue", sender: self)
+        }
+    }
+    
+    func playSound()  {
+        var soundURL: NSURL?
+        var soundID:SystemSoundID = 0
+        let filePath = Bundle.main.path(forResource: "newMessage", ofType: "wav")
+        soundURL = NSURL(fileURLWithPath: filePath!)
+        AudioServicesCreateSystemSoundID(soundURL!, &soundID)
+        AudioServicesPlaySystemSound(soundID)
+    }
+
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "segue" {
+            let vc = segue.destination as! ChatVC
+            vc.currentUser = self.selectedUser
+        }
+    }
+
+    //MARK: Delegates
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if self.items.count == 0 {
+            return 1
+        } else {
+            return self.items.count
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if self.items.count == 0 {
+            return self.view.bounds.height - self.navigationController!.navigationBar.bounds.height
+        } else {
+            return 80
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch self.items.count {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Empty Cell")!
+            return cell
+        default:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ConversationsTBCell
+            cell.clearCellData()
+            cell.profilePic.image = self.items[indexPath.row].user.profilePic
+            cell.nameLabel.text = self.items[indexPath.row].user.name
+            switch self.items[indexPath.row].lastMessage.type {
+            case .text:
+                let message = self.items[indexPath.row].lastMessage.content as! String
+                cell.messageLabel.text = message
+            case .location:
+                cell.messageLabel.text = "Location"
+            default:
+                cell.messageLabel.text = "Media"
+            }
+            let messageDate = Date.init(timeIntervalSince1970: TimeInterval(self.items[indexPath.row].lastMessage.timestamp))
+            let dataformatter = DateFormatter.init()
+            dataformatter.timeStyle = .short
+            let date = dataformatter.string(from: messageDate)
+            cell.timeLabel.text = date
+            if self.items[indexPath.row].lastMessage.owner == .sender && self.items[indexPath.row].lastMessage.isRead == false {
+                cell.nameLabel.font = UIFont(name:"AvenirNext-DemiBold", size: 17.0)
+                cell.messageLabel.font = UIFont(name:"AvenirNext-DemiBold", size: 14.0)
+                cell.timeLabel.font = UIFont(name:"AvenirNext-DemiBold", size: 13.0)
+                cell.profilePic.layer.borderColor = GlobalVariables.blue.cgColor
+                cell.messageLabel.textColor = GlobalVariables.purple
+            }
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if self.items.count > 0 {
+            self.selectedUser = self.items[indexPath.row].user
+            self.performSegue(withIdentifier: "segue", sender: self)
+        }
     }
        
-  }
-  
-/*--------------------------------------------PREPARE FOR SEGUE---------------1-----------------*/
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    super.prepare(for: segue, sender: sender)
-    let navVc = segue.destination as! UINavigationController
-    let channelVc = navVc.viewControllers.first as! ChannelListViewController
-    channelVc.senderDisplayName = nameField?.text
-  }
-  
-}
-
-
-
-
-
-
-
-/*
-Copyright (c) 2015 Razeware LLC
- */
-
-import UIKit
-import Firebase
-
-enum Section: Int {
-  case createNewChannelSection = 0
-  case currentChannelsSection
-}
-
-class ChannelListViewController: UITableViewController {
-
- // VARIABLES, PROPERTIES
-  var senderDisplayName: String?
-  var newChannelTextField: UITextField?
-  
-  private var channelRefHandle: FIRDatabaseHandle?
-  private var channels: [Channel] = []
-  
-  private lazy var channelRef: FIRDatabaseReference = FIRDatabase.database().reference().child("channels")
-  
- 
-/*--------------------------------------------VIEW DID LOAD----------------------------------------*/
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    title = "RW RIC"
-    observeChannels()
-  }
-  
-  deinit {
-    if let refHandle = channelRefHandle {
-      channelRef.removeObserver(withHandle: refHandle)
-    }
-  }
-  
-/*--------------------------------------------CREATE CHANNEL----------------------------------------*/
-  @IBAction func createChannel(_ sender: AnyObject) {
-    if let name = newChannelTextField?.text {
-      let newChannelRef = channelRef.childByAutoId()
-      let channelItem = [
-        "name": name
-      ]
-      newChannelRef.setValue(channelItem)
-    }    
-  }
-  
-  
-/*--------------------------------------------OBSERVE CHANNELS----------------------------------------*/
-  private func observeChannels() {
-    // We can use the observe method to listen for new
-    // channels being written to the Firebase DB
-    channelRefHandle = channelRef.observe(.childAdded, with: { (snapshot) -> Void in
-      let channelData = snapshot.value as! Dictionary<String, AnyObject>
-      let id = snapshot.key
-      if let name = channelData["name"] as! String!, name.characters.count > 0 {
-        self.channels.append(Channel(id: id, name: name))
-        self.tableView.reloadData()
-      } else {
-        print("Error! Could not decode channel data")
-      }
-    })
-  }
-  
-
-/*--------------------------------------------PREPARE FOR SEGUE-------------------2---------------------*/
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    super.prepare(for: segue, sender: sender)
-    
-    if let channel = sender as? Channel {
-      let chatVc = segue.destination as! ChatViewController
-      
-      chatVc.senderDisplayName = senderDisplayName
-      chatVc.channel = channel
-      chatVc.channelRef = channelRef.child(channel.id)
-    }
-  }
-  
-/*--------------------------------------------TABLE VIEW METHODS----------------------------------------*/
-  override func numberOfSections(in tableView: UITableView) -> Int {
-    return 2
-  }
-  
-  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    if let currentSection: Section = Section(rawValue: section) {
-      switch currentSection {
-      case .createNewChannelSection:
-        return 1
-      case .currentChannelsSection:
-        return channels.count
-      }
-    } else {
-      return 0
-    }
-  }
-  
-  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let reuseIdentifier = (indexPath as NSIndexPath).section == Section.createNewChannelSection.rawValue ? "NewChannel" : "ExistingChannel"
-    let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath)
-
-    if (indexPath as NSIndexPath).section == Section.createNewChannelSection.rawValue {
-      if let createNewChannelCell = cell as? CreateChannelCell {
-        newChannelTextField = createNewChannelCell.newChannelNameField
-      }
-    } else if (indexPath as NSIndexPath).section == Section.currentChannelsSection.rawValue {
-      cell.textLabel?.text = channels[(indexPath as NSIndexPath).row].name
+    //MARK: ViewController lifeCycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.customization()
+        self.fetchData()
     }
     
-    return cell
-  }
-
- 
-  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    if (indexPath as NSIndexPath).section == Section.currentChannelsSection.rawValue {
-      let channel = channels[(indexPath as NSIndexPath).row]
-      self.performSegue(withIdentifier: "ShowChannel", sender: channel)
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.showEmailAlert()
     }
-  }
-  
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let selectionIndexPath = self.tableView.indexPathForSelectedRow {
+            self.tableView.deselectRow(at: selectionIndexPath, animated: animated)
+        }
+    }
 }
 
 
@@ -174,355 +797,303 @@ class ChannelListViewController: UITableViewController {
 
 
 
-/*
-* Copyright (c) 2015 Razeware LLC
-*/
+
 
 import UIKit
 import Photos
 import Firebase
-import JSQMessagesViewController
+import CoreLocation
 
-final class ChatViewController: JSQMessagesViewController {
-  
-  // VARIABLES, PROPERTIES
-  private let imageURLNotSetKey = "NOTSET"
-  
-  var channelRef: FIRDatabaseReference?
-
-  private lazy var messageRef: FIRDatabaseReference = self.channelRef!.child("messages")
-  fileprivate lazy var storageRef: FIRStorageReference = FIRStorage.storage().reference(forURL: "gs://chatchat-rw-cf107.appspot.com")
-  private lazy var userIsTypingRef: FIRDatabaseReference = self.channelRef!.child("typingIndicator").child(self.senderId)
- 
-  private var newMessageRefHandle: FIRDatabaseHandle?
-  private var updatedMessageRefHandle: FIRDatabaseHandle?
-  
-  private var messages: [JSQMessage] = []
-  private var photoMessageMap = [String: JSQPhotoMediaItem]()
-  
-  private var localTyping = false
-  var channel: Channel? {
-    didSet {
-      title = channel?.name
-    }
-  }
-
- 
-  
-  lazy var outgoingBubbleImageView: JSQMessagesBubbleImage = self.setupOutgoingBubble()
-  lazy var incomingBubbleImageView: JSQMessagesBubbleImage = self.setupIncomingBubble()
-  
-  /*--------------------------------------------VIEW DID LOAD----------------------------------------*/
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    self.senderId = FIRAuth.auth()?.currentUser?.uid
-    observeMessages()
+class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate,  UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate {
     
-    // No avatars
-    collectionView!.collectionViewLayout.incomingAvatarViewSize = CGSize.zero
-    collectionView!.collectionViewLayout.outgoingAvatarViewSize = CGSize.zero
-  }
-  
-  /*--------------------------------------------VIEW DID APPEAR----------------------------------------*/
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-  }
-  
-  deinit {
-    if let refHandle = newMessageRefHandle {
-      messageRef.removeObserver(withHandle: refHandle)
-    }
-    if let refHandle = updatedMessageRefHandle {
-      messageRef.removeObserver(withHandle: refHandle)
-    }
-  }
-  
-  
-  /*--------------------------------------------COLLECTION VIEW----------------------------------------
-1 - change bubble views
-2 - change text color
-*/
-  override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageDataForItemAt indexPath: IndexPath!) -> JSQMessageData! {
-    return messages[indexPath.item]
-  }
-  
-  override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return messages.count
-  }
-  
-  override func collectionView(_ collectionView: JSQMessagesCollectionView!, messageBubbleImageDataForItemAt indexPath: IndexPath!) -> JSQMessageBubbleImageDataSource! {
-    let message = messages[indexPath.item]
-   //1
-    if message.senderId == senderId {
-      return outgoingBubbleImageView
-    } else {
-      return incomingBubbleImageView
-    }
-  }
-  
-    
-  override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! JSQMessagesCollectionViewCell
-    
-    let message = messages[indexPath.item]
-    //2
-    if message.senderId == senderId {
-      cell.textView?.textColor = UIColor.white
-    } else {
-      cell.textView?.textColor = UIColor.black
-    }
-    
-    return cell
-  }
-  
-  override func collectionView(_ collectionView: JSQMessagesCollectionView!, avatarImageDataForItemAt indexPath: IndexPath!) -> JSQMessageAvatarImageDataSource! {
-    return nil
-  }
-  
-  override func collectionView(_ collectionView: JSQMessagesCollectionView!, layout collectionViewLayout: JSQMessagesCollectionViewFlowLayout!, heightForMessageBubbleTopLabelAt indexPath: IndexPath!) -> CGFloat {
-    return 15
-  }
-  
-  override func collectionView(_ collectionView: JSQMessagesCollectionView?, attributedTextForMessageBubbleTopLabelAt indexPath: IndexPath!) -> NSAttributedString? {
-    let message = messages[indexPath.item]
-    switch message.senderId {
-    case senderId:
-      return nil
-    default:
-      guard let senderDisplayName = message.senderDisplayName else {
-        assertionFailure()
-        return nil
-      }
-      return NSAttributedString(string: senderDisplayName)
-    }
-  }
-
- 
-    
-/*------------------F--------------------------OBSERVE MESSAGES----------------------------------------
-1 - listen for new messages being written to the Firebase DB
-2 - add the message using addMessage()
-3 - add the photo message using addPhotoMessage
-4 - listen for changes to existing messages
-we use this to be notified when a photo has been stored (update the message data)
-     
-*/
-  private func observeMessages() {
-    messageRef = channelRef!.child("messages")
-    let messageQuery = messageRef.queryLimited(toLast:25)
-    
-    //1
-    newMessageRefHandle = messageQuery.observe(.childAdded, with: { (snapshot) -> Void in
-      let messageData = snapshot.value as! Dictionary<String, String>
-
-      if let id = messageData["senderId"] as String!, let name = messageData["senderName"] as String!, let text = messageData["text"] as String!, text.characters.count > 0 {
-        //2
-        self.addMessage(withId: id, name: name, text: text)
-      }
-      
-      
-      else if let id = messageData["senderId"] as String!, let photoURL = messageData["photoURL"] as String! {
-        if let mediaItem = JSQPhotoMediaItem(maskAsOutgoing: id == self.senderId) {
-         //3
-            self.addPhotoMessage(withId: id, key: snapshot.key, mediaItem: mediaItem)
-            
-          if photoURL.hasPrefix("gs://") {
-            self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: nil)
-          }
+    //MARK: Properties
+    @IBOutlet var inputBar: UIView!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var inputTextField: UITextField!
+    @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
+    override var inputAccessoryView: UIView? {
+        get {
+            self.inputBar.frame.size.height = self.barHeight
+            self.inputBar.clipsToBounds = true
+            return self.inputBar
         }
-      } else {
-        print("Error! Could not decode message data")
-      }
-    })
-    
-    //4
-    updatedMessageRefHandle = messageRef.observe(.childChanged, with: { (snapshot) in
-      let key = snapshot.key
-      let messageData = snapshot.value as! Dictionary<String, String>
-      
-      if let photoURL = messageData["photoURL"] as String! {
-        // The photo has been updated.
-        if let mediaItem = self.photoMessageMap[key] {
-          self.fetchImageDataAtURL(photoURL, forMediaItem: mediaItem, clearsPhotoMessageMapOnSuccessForKey: key)
-        }
-      }
-    })
-  }
-  
-    
-  /*-----------------F---------------------------FETCH IMAGE DATA----------------------------------------*/
-  private func fetchImageDataAtURL(_ photoURL: String, forMediaItem mediaItem: JSQPhotoMediaItem, clearsPhotoMessageMapOnSuccessForKey key: String?) {
-    let storageRef = FIRStorage.storage().reference(forURL: photoURL)
-    storageRef.data(withMaxSize: INT64_MAX){ (data, error) in
-      if let error = error {
-        print("Error downloading image data: \(error)")
-        return
-      }
-      
-      storageRef.metadata(completion: { (metadata, metadataErr) in
-        if let error = metadataErr {
-          print("Error downloading metadata: \(error)")
-          return
-        }
-        
-        if (metadata?.contentType == "image/gif") {
-          mediaItem.image = UIImage.gifWithData(data!)
-        } else {
-          mediaItem.image = UIImage.init(data: data!)
-        }
-        self.collectionView.reloadData()
-        
-        guard key != nil else {
-          return
-        }
-        self.photoMessageMap.removeValue(forKey: key!)
-      })
     }
-  }
-  
-  
-    
-  /*--------------------------------------------SEND-----------------1-----------------------*/
-  override func didPressSend(_ button: UIButton!, withMessageText text: String!, senderId: String!, senderDisplayName: String!, date: Date!) {
-   
-    
-    let itemRef = messageRef.childByAutoId()
-    
-    let messageItem = [
-        "senderId" : senderId!,
-        "senderName" : senderDisplayName!,
-        "text": text!
-    ]
-    
-    itemRef.setValue(messageItem)
-    JSQSystemSoundPlayer.jsq_playMessageSentSound()
-    
-    finishSendingMessage()
+    override var canBecomeFirstResponder: Bool{
+        return true
     }
-  
+    let locationManager = CLLocationManager()
+    var items = [Message]()
+    let imagePicker = UIImagePickerController()
+    let barHeight: CGFloat = 50
+    var currentUser: User?
+    var canSendLocation = true
     
-  /*--------------------------------------------SEND------------------2----------------------*/
-  func sendPhotoMessage() -> String? {
-    let itemRef = messageRef.childByAutoId()
-    
-    let messageItem = [
-      "photoURL": imageURLNotSetKey,
-      "senderId": senderId!,
-      ]
-    
-    itemRef.setValue(messageItem)
-    
-    JSQSystemSoundPlayer.jsq_playMessageSentSound()
-    
-    finishSendingMessage()
-    return itemRef.key
-  }
-  
-/*--------------------------------------------SET IMAGE URL-----------------------------------*/
-  func setImageURL(_ url: String, forPhotoMessageWithKey key: String) {
-    let itemRef = messageRef.child(key)
-    itemRef.updateChildValues(["photoURL": url])
-  }
-  
- 
-    
-  /*-----------------------------------SETUP BUBBLES AND THEIR COLORS---------------------------*/
-  private func setupOutgoingBubble() -> JSQMessagesBubbleImage {
-    let bubbleImageFactory = JSQMessagesBubbleImageFactory()
-    return bubbleImageFactory!.outgoingMessagesBubbleImage(with: UIColor.jsq_messageBubbleGreen())
-  }
 
-  private func setupIncomingBubble() -> JSQMessagesBubbleImage {
-    let bubbleImageFactory = JSQMessagesBubbleImageFactory()
-    return bubbleImageFactory!.incomingMessagesBubbleImage(with: UIColor.jsq_messageBubbleLightGray())
-  }
-
-/*------------------------------------------PICKING AN IMAGE-----------------------------------------*/
-  override func didPressAccessoryButton(_ sender: UIButton) {
-    let picker = UIImagePickerController()
-    picker.delegate = self
-    if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
-      picker.sourceType = UIImagePickerControllerSourceType.camera
-    } else {
-      picker.sourceType = UIImagePickerControllerSourceType.photoLibrary
+    //MARK: Methods
+    func customization() {
+        self.imagePicker.delegate = self
+        self.tableView.estimatedRowHeight = self.barHeight
+        self.tableView.rowHeight = UITableViewAutomaticDimension
+        self.tableView.contentInset.bottom = self.barHeight
+        self.tableView.scrollIndicatorInsets.bottom = self.barHeight
+        self.navigationItem.title = self.currentUser?.name
+        self.navigationItem.setHidesBackButton(true, animated: false)
+        let icon = UIImage.init(named: "back")?.withRenderingMode(.alwaysOriginal)
+        let backButton = UIBarButtonItem.init(image: icon!, style: .plain, target: self, action: #selector(self.dismissSelf))
+        self.navigationItem.leftBarButtonItem = backButton
+        self.locationManager.delegate = self
     }
     
-    present(picker, animated: true, completion:nil)
-  }
-  
-    
-  /*--------------------------------------------ADD MESSSAGE----------------------------------------*/
-  private func addMessage(withId id: String, name: String, text: String) {
-    if let message = JSQMessage(senderId: id, displayName: name, text: text) {
-      messages.append(message)      
-    }
-  }
-  
-  private func addPhotoMessage(withId id: String, key: String, mediaItem: JSQPhotoMediaItem) {
-    if let message = JSQMessage(senderId: id, displayName: "", media: mediaItem) {
-      messages.append(message)
-      
-      if (mediaItem.image == nil) {
-        photoMessageMap[key] = mediaItem
-      }
-      
-      collectionView.reloadData()
-    }
-  }
- 
-}
-
-
-
-
-  /*--------------------------------------------IMPC----------------------------------------
- 1 - Retrieve assets from the URL
- 2 - get the FirebaseKey from sendPhotoMessage()
- 3 - get the file URL
- 4 - create a unique path based on the user’s unique ID and the current time
- 5 - save image to the Firebase storage
- 6 - call setImageURL() to update your photo message with the correct URL
- */
-
-extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-  func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-
-    
-    picker.dismiss(animated: true, completion:nil)
-
-    
-    if let photoReferenceUrl = info[UIImagePickerControllerReferenceURL] as? URL {
-     
-      // 1
-      let assets = PHAsset.fetchAssets(withALAssetURLs: [photoReferenceUrl], options: nil)
-      let asset = assets.firstObject
-
-      // 2
-      if let key = sendPhotoMessage() {
-        // 3
-        asset?.requestContentEditingInput(with: nil, completionHandler: { (contentEditingInput, info) in
-          let imageFileURL = contentEditingInput?.fullSizeImageURL
-
-          // 4
-          let path = "\(FIRAuth.auth()?.currentUser?.uid)/\(Int(Date.timeIntervalSinceReferenceDate * 1000))/\(photoReferenceUrl.lastPathComponent)"
-
-          // 5
-          self.storageRef.child(path).putFile(imageFileURL!, metadata: nil) { (metadata, error) in
-            if let error = error {
-              print("Error uploading photo: \(error.localizedDescription)")
-              return
+    //Downloads messages
+    func fetchData() {
+        Message.downloadAllMessages(forUserID: self.currentUser!.id, completion: {[weak weakSelf = self] (message) in
+            weakSelf?.items.append(message)
+            weakSelf?.items.sort{ $0.timestamp < $1.timestamp }
+            DispatchQueue.main.async {
+                if let state = weakSelf?.items.isEmpty, state == false {
+                    weakSelf?.tableView.reloadData()
+                    weakSelf?.tableView.scrollToRow(at: IndexPath.init(row: self.items.count - 1, section: 0), at: .bottom, animated: false)
+                }
             }
-            // 6
-            self.setImageURL(self.storageRef.child((metadata?.path)!).description, forPhotoMessageWithKey: key)
-          }
         })
-      }
+        Message.markMessagesRead(forUserID: self.currentUser!.id)
     }
+    
+    //Hides current viewcontroller
+    func dismissSelf() {
+        if let navController = self.navigationController {
+            navController.popViewController(animated: true)
+        }
+    }
+    
+    func composeMessage(type: MessageType, content: Any)  {
+        let message = Message.init(type: type, content: content, owner: .sender, timestamp: Int(Date().timeIntervalSince1970), isRead: false)
+        Message.send(message: message, toID: self.currentUser!.id, completion: {(_) in
+        })
+    }
+    
+    func checkLocationPermission() -> Bool {
+        var state = false
+        switch CLLocationManager.authorizationStatus() {
+        case .authorizedWhenInUse:
+            state = true
+        case .authorizedAlways:
+            state = true
+        default: break
+        }
+        return state
+    }
+    
+    func animateExtraButtons(toHide: Bool)  {
+        switch toHide {
+        case true:
+            self.bottomConstraint.constant = 0
+            UIView.animate(withDuration: 0.3) {
+                self.inputBar.layoutIfNeeded()
+            }
+        default:
+            self.bottomConstraint.constant = -50
+            UIView.animate(withDuration: 0.3) {
+                self.inputBar.layoutIfNeeded()
+            }
+        }
+    }
+    
+    @IBAction func showMessage(_ sender: Any) {
+       self.animateExtraButtons(toHide: true)
+    }
+    
+    @IBAction func selectGallery(_ sender: Any) {
+        self.animateExtraButtons(toHide: true)
+        let status = PHPhotoLibrary.authorizationStatus()
+        if (status == .authorized || status == .notDetermined) {
+            self.imagePicker.sourceType = .savedPhotosAlbum;
+            self.present(self.imagePicker, animated: true, completion: nil)
+        }
+        
+    }
+    
+    @IBAction func selectCamera(_ sender: Any) {
+        self.animateExtraButtons(toHide: true)
+        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        if (status == .authorized || status == .notDetermined) {
+            self.imagePicker.sourceType = .camera
+            self.imagePicker.allowsEditing = false
+            self.present(self.imagePicker, animated: true, completion: nil)
+        }
+    }
+    
+    @IBAction func selectLocation(_ sender: Any) {
+        self.canSendLocation = true
+        self.animateExtraButtons(toHide: true)
+        if self.checkLocationPermission() {
+            self.locationManager.startUpdatingLocation()
+        } else {
+            self.locationManager.requestWhenInUseAuthorization()
+        }
+    }
+    
+    @IBAction func showOptions(_ sender: Any) {
+        self.animateExtraButtons(toHide: false)
+    }
+    
+    @IBAction func sendMessage(_ sender: Any) {
+        if let text = self.inputTextField.text {
+            if text.characters.count > 0 {
+                self.composeMessage(type: .text, content: self.inputTextField.text!)
+                self.inputTextField.text = ""
+            }
+        }
+    }
+    
+    //MARK: NotificationCenter handlers
+    func showKeyboard(notification: Notification) {
+        if let frame = notification.userInfo![UIKeyboardFrameEndUserInfoKey] as? NSValue {
+            let height = frame.cgRectValue.height
+            self.tableView.contentInset.bottom = height
+            self.tableView.scrollIndicatorInsets.bottom = height
+            if self.items.count > 0 {
+                self.tableView.scrollToRow(at: IndexPath.init(row: self.items.count - 1, section: 0), at: .bottom, animated: true)
+            }
+        }
     }
 
-  func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-    picker.dismiss(animated: true, completion:nil)
-  }
+    //MARK: Delegates
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.items.count
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if tableView.isDragging {
+            cell.transform = CGAffineTransform.init(scaleX: 0.5, y: 0.5)
+            UIView.animate(withDuration: 0.3, animations: {
+                cell.transform = CGAffineTransform.identity
+            })
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch self.items[indexPath.row].owner {
+        case .receiver:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Receiver", for: indexPath) as! ReceiverCell
+            cell.clearCellData()
+            switch self.items[indexPath.row].type {
+            case .text:
+                cell.message.text = self.items[indexPath.row].content as! String
+            case .photo:
+                if let image = self.items[indexPath.row].image {
+                    cell.messageBackground.image = image
+                    cell.message.isHidden = true
+                } else {
+                    cell.messageBackground.image = UIImage.init(named: "loading")
+                    self.items[indexPath.row].downloadImage(indexpathRow: indexPath.row, completion: { (state, index) in
+                        if state == true {
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
+                        }
+                    })
+                }
+            case .location:
+                cell.messageBackground.image = UIImage.init(named: "location")
+                cell.message.isHidden = true
+            }
+            return cell
+        case .sender:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Sender", for: indexPath) as! SenderCell
+            cell.clearCellData()
+            cell.profilePic.image = self.currentUser?.profilePic
+            switch self.items[indexPath.row].type {
+            case .text:
+                cell.message.text = self.items[indexPath.row].content as! String
+            case .photo:
+                if let image = self.items[indexPath.row].image {
+                    cell.messageBackground.image = image
+                    cell.message.isHidden = true
+                } else {
+                    cell.messageBackground.image = UIImage.init(named: "loading")
+                    self.items[indexPath.row].downloadImage(indexpathRow: indexPath.row, completion: { (state, index) in
+                        if state == true {
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                            }
+                        }
+                    })
+                }
+            case .location:
+                cell.messageBackground.image = UIImage.init(named: "location")
+                cell.message.isHidden = true
+            }
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.inputTextField.resignFirstResponder()
+        switch self.items[indexPath.row].type {
+        case .photo:
+            if let photo = self.items[indexPath.row].image {
+                let info = ["viewType" : ShowExtraView.preview, "pic": photo] as [String : Any]
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showExtraView"), object: nil, userInfo: info)
+                self.inputAccessoryView?.isHidden = true
+            }
+        case .location:
+            let coordinates = (self.items[indexPath.row].content as! String).components(separatedBy: ":")
+            let location = CLLocationCoordinate2D.init(latitude: CLLocationDegrees(coordinates[0])!, longitude: CLLocationDegrees(coordinates[1])!)
+            let info = ["viewType" : ShowExtraView.map, "location": location] as [String : Any]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "showExtraView"), object: nil, userInfo: info)
+            self.inputAccessoryView?.isHidden = true
+        default: break
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        if let pickedImage = info[UIImagePickerControllerEditedImage] as? UIImage {
+            self.composeMessage(type: .photo, content: pickedImage)
+        } else {
+            let pickedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+            self.composeMessage(type: .photo, content: pickedImage)
+        }
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        self.locationManager.stopUpdatingLocation()
+        if let lastLocation = locations.last {
+            if self.canSendLocation {
+                let coordinate = String(lastLocation.coordinate.latitude) + ":" + String(lastLocation.coordinate.longitude)
+                let message = Message.init(type: .location, content: coordinate, owner: .sender, timestamp: Int(Date().timeIntervalSince1970), isRead: false)
+                Message.send(message: message, toID: self.currentUser!.id, completion: {(_) in
+                })
+                self.canSendLocation = false
+            }
+        }
+    }
+
+    //MARK: ViewController lifecycle
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.inputBar.backgroundColor = UIColor.clear
+        self.view.layoutIfNeeded()
+        NotificationCenter.default.addObserver(self, selector: #selector(ChatVC.showKeyboard(notification:)), name: Notification.Name.UIKeyboardWillShow, object: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self)
+        Message.markMessagesRead(forUserID: self.currentUser!.id)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.customization()
+        self.fetchData()
+    }
 }
 
 
@@ -533,3 +1104,83 @@ extension ChatViewController: UIImagePickerControllerDelegate, UINavigationContr
 
 
 
+
+
+
+import Foundation
+import UIKit
+
+
+class SenderCell: UITableViewCell {
+    
+    @IBOutlet weak var profilePic: RoundedImageView!
+    @IBOutlet weak var message: UITextView!
+    @IBOutlet weak var messageBackground: UIImageView!
+    
+    func clearCellData()  {
+        self.message.text = nil
+        self.message.isHidden = false
+        self.messageBackground.image = nil
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.selectionStyle = .none
+        self.message.textContainerInset = UIEdgeInsetsMake(5, 5, 5, 5)
+        self.messageBackground.layer.cornerRadius = 15
+        self.messageBackground.clipsToBounds = true
+    }
+}
+
+class ReceiverCell: UITableViewCell {
+    
+    @IBOutlet weak var message: UITextView!
+    @IBOutlet weak var messageBackground: UIImageView!
+    
+    func clearCellData()  {
+        self.message.text = nil
+        self.message.isHidden = false
+        self.messageBackground.image = nil
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.selectionStyle = .none
+        self.message.textContainerInset = UIEdgeInsetsMake(5, 5, 5, 5)
+        self.messageBackground.layer.cornerRadius = 15
+        self.messageBackground.clipsToBounds = true
+    }
+}
+
+class ConversationsTBCell: UITableViewCell {
+    
+    @IBOutlet weak var profilePic: RoundedImageView!
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
+    
+    func clearCellData()  {
+        self.nameLabel.font = UIFont(name:"AvenirNext-Regular", size: 17.0)
+        self.messageLabel.font = UIFont(name:"AvenirNext-Regular", size: 14.0)
+        self.timeLabel.font = UIFont(name:"AvenirNext-Regular", size: 13.0)
+        self.profilePic.layer.borderColor = GlobalVariables.purple.cgColor
+        self.messageLabel.textColor = UIColor.rbg(r: 111, g: 113, b: 121)
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.profilePic.layer.borderWidth = 2
+        self.profilePic.layer.borderColor = GlobalVariables.purple.cgColor
+    }
+    
+}
+
+class ContactsCVCell: UICollectionViewCell {
+    
+    @IBOutlet weak var profilePic: RoundedImageView!
+    @IBOutlet weak var nameLabel: UILabel!
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+    }
+}
