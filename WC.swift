@@ -1,4 +1,11 @@
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
+
 import UIKit
+
 
 class LandingVC: UIViewController {
     
@@ -9,7 +16,7 @@ class LandingVC: UIViewController {
         }
     }
 
-    //MARK: Push to relevant ViewController
+/*------------------------------------------------------------------------PUSH TO RELEVANT WC------------------------------------------------------------------------*/
     func pushTo(viewController: ViewControllerType)  {
         switch viewController {
         case .conversations:
@@ -21,7 +28,7 @@ class LandingVC: UIViewController {
         }
     }
     
-    //MARK: Check if user is signed in or not
+/*------------------------------------------------------------------------CHECK TO RELEVANT WC------------------------------------------------------------------------*/
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if let userInformation = UserDefaults.standard.dictionary(forKey: "userInformation") {
@@ -62,6 +69,14 @@ class LandingVC: UIViewController {
 
 
 
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
+
+
 import UIKit
 import Photos
 
@@ -92,7 +107,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
-    //MARK: Methods
+/* -----------------------------------------------------------------------CUSTOMIZATION------------------------------------------------------------------------*/
     func customization()  {
         self.darkView.alpha = 0
         self.imagePicker.delegate = self
@@ -148,6 +163,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         self.show(vc, sender: nil)
     }
     
+    /* ------------------------------------------------------------------------OPEN PHOTO PICKER------------------------------------------------------------------------*/
     func openPhotoPickerWith(source: PhotoSource) {
         switch source {
         case .camera:
@@ -167,6 +183,8 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
+    
+    /* ------------------------------------------------------------------------SWITCH VIEW------------------------------------------------------------------------*/
     @IBAction func switchViews(_ sender: UIButton) {
         if self.isLoginViewVisible {
             self.isLoginViewVisible = false
@@ -187,6 +205,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
+    /* ------------------------------------------------------------------------REGISTER------------------------------------------------------------------------*/
     @IBAction func register(_ sender: Any) {
         for item in self.inputFields {
             item.resignFirstResponder()
@@ -210,6 +229,8 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
+    
+    /*------------------------------------------------------------------------LOGIN------------------------------------------------------------------------*/
     @IBAction func login(_ sender: Any) {
         for item in self.inputFields {
             item.resignFirstResponder()
@@ -233,6 +254,8 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
+    
+    /*------------------------------------------------------------------------SELECT PICTURE------------------------------------------------------------------------*/
     @IBAction func selectPic(_ sender: Any) {
         let sheet = UIAlertController(title: nil, message: "Select the source", preferredStyle: .actionSheet)
         let cameraAction = UIAlertAction(title: "Camera", style: .default, handler: {
@@ -250,7 +273,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         self.present(sheet, animated: true, completion: nil)
     }
     
-    //MARK: Delegates
+    /*------------------------------------------------------------------------DELEGATES------------------------------------------------------------------------*/
     func textFieldDidBeginEditing(_ textField: UITextField) {
         for item in self.waringLabels {
             item.isHidden = true
@@ -299,6 +322,16 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
 
 
 
+
+
+
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
+
 import UIKit
 import Firebase
 import MapKit
@@ -321,7 +354,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
     let darkView = UIView.init()
     var items = [User]()
     
-    //MARK: Methods
+/* ------------------------------------------------------------------------CUSTOMIZATION------------------------------------------------------------------------*/
     func customization() {
         //DarkView customization
         self.view.addSubview(self.darkView)
@@ -392,7 +425,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
 
     }
     
-    //Hide Extra views
+    /*-------------------------------------------------------------------------HIDE EXTRA VIEWS------------------------------------------------------------------------*/
     func dismissExtraViews() {
         self.topAnchorContraint.constant = 1000
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseIn, animations: {
@@ -411,7 +444,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         })
     }
     
-    //Show extra view
+     /*-------------------------------------------------------------------------SHOW EXTRA VIEW------------------------------------------------------------------------*/
     func showExtraViews(notification: NSNotification)  {
         let transform = CGAffineTransform.init(scaleX: 0.94, y: 0.94)
         self.topAnchorContraint.constant = 0
@@ -446,7 +479,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-    //Preview view scrollview's zoom calculation
+    /*-------------------------------------------------------------------------ZOOM RECT FOR SCALE------------------------------------------------------------------------*/
     func zoomRectForScale(scale: CGFloat, center: CGPoint) -> CGRect {
         var zoomRect = CGRect.zero
         zoomRect.size.height = self.previewImageView.frame.size.height / scale
@@ -457,7 +490,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         return zoomRect
     }
     
-    //Downloads users list for Contacts View
+       /*-------------------------------------------------------------------------FETCH USERS AND THEIR INFO------------------------------------------------------------------------*/
     func fetchUsers()  {
         if let id = FIRAuth.auth()?.currentUser?.uid {
             User.downloadAllUsers(exceptID: id, completion: {(user) in
@@ -469,7 +502,6 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-    //Downloads current user credentials
     func fetchUserInfo() {
         if let id = FIRAuth.auth()?.currentUser?.uid {
             User.info(forUserID: id, completion: {[weak weakSelf = self] (user) in
@@ -483,7 +515,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-    //Extra gesture to allow user double tap for zooming of preview view scrollview
+       /*-------------------------------------------------------------------------ALLOW USERS TO DOUBLE TAP FOR ZOOMING-------------------------------------------------------------*/
     @IBAction func doubleTapGesture(_ sender: UITapGestureRecognizer) {
         if self.scrollView.zoomScale == 1 {
             self.scrollView.zoom(to: zoomRectForScale(scale: self.scrollView.maximumZoomScale, center: sender.location(in: sender.view)), animated: true)
@@ -504,7 +536,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-    //MARK: Delegates
+    /*-------------------------------------------------------------------------COLLECTION VIEW-----------------------------------------------------------------------*/
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if self.items.count == 0 {
             return 1
@@ -559,7 +591,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-    //Preview view scrollview zooming
+
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.previewImageView
     }
@@ -583,6 +615,13 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
 
 
 
+
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
 import UIKit
 import Firebase
 import AudioToolbox
@@ -600,7 +639,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
     var items = [Conversation]()
     var selectedUser: User?
     
-    //MARK: Methods
+      /*-------------------------------------------------------------------------CUSTOMIZATION------------------------------------------------------------------------*/
     func customization()  {
         self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
         //NavigationBar customization
@@ -637,7 +676,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
         }
     }
     
-    //Downloads conversations
+    /*-------------------------------------------------------------------------DOWNLOAD CONVERSATIONS------------------------------------------------------------------------*/
     func fetchData() {
         Conversation.showConversations { (conversations) in
             self.items = conversations
@@ -703,7 +742,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
         }
     }
 
-    //MARK: Delegates
+    /*-------------------------------------------------------------------------DELEGATES------------------------------------------------------------------------*/
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -724,6 +763,8 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
         }
     }
     
+    
+        /*-------------------------------------------------------------------------FILL-IN CELLS------------------------------------------------------------------------*/
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.items.count {
         case 0:
@@ -798,6 +839,18 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 
 
+
+
+
+
+
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
+
 import UIKit
 import Photos
 import Firebase
@@ -828,7 +881,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
     var canSendLocation = true
     
 
-    //MARK: Methods
+       /*-------------------------------------------------------------------------CUSTOMIZATION------------------------------------------------------------------------*/
     func customization() {
         self.imagePicker.delegate = self
         self.tableView.estimatedRowHeight = self.barHeight
@@ -843,7 +896,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         self.locationManager.delegate = self
     }
     
-    //Downloads messages
+        /*-------------------------------------------------------------------------DOWNLOAD MESSAGES------------------------------------------------------------------------*/
     func fetchData() {
         Message.downloadAllMessages(forUserID: self.currentUser!.id, completion: {[weak weakSelf = self] (message) in
             weakSelf?.items.append(message)
@@ -898,6 +951,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         }
     }
     
+    /*-------------------------------------------------------------------------SHOW MESSAGE, SELECT GALLERY, SELECT CAMERA------------------------------------------------------------------------*/
     @IBAction func showMessage(_ sender: Any) {
        self.animateExtraButtons(toHide: true)
     }
@@ -922,6 +976,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         }
     }
     
+    
+        /*-------------------------------------------------------------------------SELECT LOCATION------------------------------------------------------------------------*/
     @IBAction func selectLocation(_ sender: Any) {
         self.canSendLocation = true
         self.animateExtraButtons(toHide: true)
@@ -957,7 +1013,7 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         }
     }
 
-    //MARK: Delegates
+        /*-------------------------------------------------------------------------DELEGATES------------------------------------------------------------------------*/
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.items.count
     }
@@ -971,6 +1027,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         }
     }
     
+    
+        /*-------------------------------------------------------------------------FILL-IN CELLS------------------------------------------------------------------------*/
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.items[indexPath.row].owner {
         case .receiver:
@@ -1027,6 +1085,9 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         }
     }
     
+    
+    
+        /*-------------------------------------------------------------------------DID SELECT ROW------------------------------------------------------------------------*/
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.inputTextField.resignFirstResponder()
         switch self.items[indexPath.row].type {
@@ -1051,6 +1112,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         return true
     }
     
+    
+        /*-------------------------------------------------------------------------IMPC------------------------------------------------------------------------*/
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let pickedImage = info[UIImagePickerControllerEditedImage] as? UIImage {
             self.composeMessage(type: .photo, content: pickedImage)
@@ -1061,6 +1124,8 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
         picker.dismiss(animated: true, completion: nil)
     }
     
+    
+        /*--------------------------------------------------------------DID UPDATE LOCATIONS-----------------------------------------------------------*/
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         self.locationManager.stopUpdatingLocation()
         if let lastLocation = locations.last {
@@ -1108,6 +1173,15 @@ class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITe
 
 
 
+
+
+
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
+
 import Foundation
 import UIKit
 
@@ -1133,6 +1207,11 @@ class SenderCell: UITableViewCell {
     }
 }
 
+
+
+
+
+
 class ReceiverCell: UITableViewCell {
     
     @IBOutlet weak var message: UITextView!
@@ -1152,6 +1231,12 @@ class ReceiverCell: UITableViewCell {
         self.messageBackground.clipsToBounds = true
     }
 }
+
+
+
+
+
+
 
 class ConversationsTBCell: UITableViewCell {
     
@@ -1175,6 +1260,10 @@ class ConversationsTBCell: UITableViewCell {
     }
     
 }
+
+
+
+
 
 class ContactsCVCell: UICollectionViewCell {
     
@@ -1217,13 +1306,10 @@ class ContactsCVCell: UICollectionViewCell {
 
 
 
-
-
-
-
-
-
 //  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
+
 
 
 import Foundation
@@ -1355,6 +1441,10 @@ class User: NSObject {
 
 
 
+
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
 
 
 import Foundation
@@ -1559,6 +1649,9 @@ class Message {
 
 
 
+//  MIT License
+
+//  Copyright (c) 2017 Haik Aslanyan
 
 
 
