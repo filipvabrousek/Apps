@@ -178,12 +178,12 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         }
     }
     
-    ```
+ ```
  * register and log-in (5)
  * select picture and helper methods
  
  
-```Swift
+```swift
     /* --------5-----------*/
     @IBAction func register(_ sender: Any) {
         for item in self.inputFields {
