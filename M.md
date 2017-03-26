@@ -128,15 +128,15 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         let vc = self.storyboard?.instantiateViewController(withIdentifier: "Navigation") as! NavVC
         self.show(vc, sender: nil)
     }
-    ```
+```
     
-    
-* open photo picker (3)
-* switch views (4)
+  # U
+ * open photo picker (3)
+ * switch views (4)
    
    
 ```swift
-    /* --------3----------*/
+    /*--------3----------*/
     func openPhotoPickerWith(source: PhotoSource) {
         switch source {
         case .camera:
@@ -157,7 +157,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
     }
     
     
-    /* ---------4----------*/
+    /*---------4----------*/
     @IBAction func switchViews(_ sender: UIButton) {
         if self.isLoginViewVisible {
             self.isLoginViewVisible = false
