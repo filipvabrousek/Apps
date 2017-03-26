@@ -442,7 +442,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
 ```
 * zoom rect for scale (1)
 * fetch users (2)
-* double tap gestures and helepr methods (3)
+* double tap gestures and helper methods (3)
 
 ```swift
 /*----------1------------*/
@@ -504,10 +504,10 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
 
 ```
 * Collection view methods (message cells) (1)
-* 
+* View for zooming (2)
 
 ```swift
- /*-----------1---------------*/
+ /*--------1-----------*/
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if self.items.count == 0 {
             return 1
@@ -562,7 +562,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
         }
     }
     
-
+/*---------2--------*/
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.previewImageView
     }
@@ -581,7 +581,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
 
 ```
 
-* customization
+* customization (1)
 
 ```swift
 class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -638,7 +638,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 
 * fetch the data (1)
-* self dscribing functions (2)
+* self describing functions (2)
 
 ```swift
  /*--------1---------*/
@@ -712,7 +712,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 * tableview methods (delegates) (1)
 * fill-in cells BIG method (2)
-* didSelectRow + helepr methods (3)
+* didSelectRow + helper methods (3)
 
 
 
@@ -739,7 +739,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
     }
     
     
-        /*----------2------------------*/
+      /*----------2----------*/
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch self.items.count {
         case 0:
@@ -775,6 +775,8 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
         }
     }
     
+    
+    /*----------3----------*/
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if self.items.count > 0 {
             self.selectedUser = self.items[indexPath.row].user
