@@ -128,9 +128,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
         let vc = self.storyboard?.instantiateViewController(withIdentifier: "Navigation") as! NavVC
         self.show(vc, sender: nil)
     }
-```
-    
-  # U
+``` 
  * open photo picker (3)
  * switch views (4)
    
@@ -293,7 +291,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
 ```
 # Navigation WC
 * customize (1)
-* dismiss and show extra views
+* dismiss and show extra views (2)
 
 ```swift
 class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
@@ -314,7 +312,7 @@ class NavVC: UINavigationController, UICollectionViewDelegate, UICollectionViewD
     let darkView = UIView.init()
     var items = [User]()
     
-/* --------1-----------*/
+/*--------1-----------*/
     func customization() {
         //DarkView customization
         self.view.addSubview(self.darkView)
@@ -807,7 +805,7 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 
 # Chat WC
-* describe
+* describe...
 
 ```swift
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate,  UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate {
@@ -1205,7 +1203,7 @@ class ContactsCVCell: UICollectionViewCell {
     }
 }
 ```
-# User
+# User class
 
 ```swift
 class User: NSObject {
@@ -1322,7 +1320,7 @@ class User: NSObject {
 
 ```
 
-# Message
+# Message class
 
 ```swift
 class Message {
