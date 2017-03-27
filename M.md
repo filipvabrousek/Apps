@@ -177,7 +177,7 @@ class WelcomeVC: UIViewController, UITextFieldDelegate, UINavigationControllerDe
     }
     
  ```
- * register and log-in (5)
+ * register and log-in using "registerUser" method in User class below (5)
  * select picture and helper methods
  
  
@@ -1206,6 +1206,7 @@ class ContactsCVCell: UICollectionViewCell {
 }
 ```
 # User class
+* here is the registerUser method which is called above
 
 ```swift
 class User: NSObject {
