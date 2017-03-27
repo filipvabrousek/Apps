@@ -805,7 +805,9 @@ class ConversationsVC: UIViewController, UITableViewDelegate, UITableViewDataSou
 
 
 # Chat WC
-* describe...
+* items is an array consisted of Message() class
+* Messages are downloaded through fetchData()
+* 
 
 ```swift
 class ChatVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate,  UINavigationControllerDelegate, UIImagePickerControllerDelegate, CLLocationManagerDelegate {
@@ -1321,6 +1323,7 @@ class User: NSObject {
 ```
 
 # Message class
+* downloadAllMessages method download messages from FIRDatabase
 
 ```swift
 class Message {
