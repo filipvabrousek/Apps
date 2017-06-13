@@ -1,0 +1,15 @@
+1) makeappicon.com (add them to assets folder)
+2) LaunchScreen Images - use assests as a source
+
+3) Accounts - view details - create signing identity
+4) Connect iPhone and allow to run in iPhones settings
+
+5) Create certificate on apple.developer.com (paid account needed)
+6) Add apps details on iTunes Connect
+7) xCode - organize - upload
+
+8)Hosting - WP - install Appz theme
+
+
+FOLLOW APPLE DESIGN GUIDELINES!!!!
+https://developer.apple.com/ios/human-interface-guidelines/overview/design-principles/

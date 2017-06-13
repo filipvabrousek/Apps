@@ -1,0 +1,45 @@
+Adblocker extension
+
+
+
+
+[
+ {
+ "action": {
+ "type": "block"
+ },
+ "trigger": {
+ "url-filter": ".*filipvabrousek.*"
+ }
+ },
+ 
+ 
+ {
+ "action": {
+ "type": "block"
+ },
+ "trigger": {
+ "url-filter": "https?://(www.)?.cnn.*"
+ }
+ },
+ 
+ {
+ "action": {
+ "type": "css-display-none",
+ "selector" : "a[href*='www.reddit']"
+ },
+ "trigger": {
+ "url-filter": "https?://(www.)?.cnn.*"
+ }
+ },
+ 
+ {
+ "action": {
+ "type": "block"
+ },
+ "trigger": {
+ "url-filter": ".*"
+ }
+ },
+ 
+ ]

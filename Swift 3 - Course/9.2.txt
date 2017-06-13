@@ -1,0 +1,8 @@
+1) Cocoa Pods - dependency manager
+Allows you to install frameworks into your project
+install by command: sudo gem install cocoapods + install RVM (Ruby version manager)
+
+2) App Analytics - firebase.google.com
+
+3) adMob download it, set it up and set up banner in xCode (ACCOUNT REQUIRED) - I didnt want to do :)
+
