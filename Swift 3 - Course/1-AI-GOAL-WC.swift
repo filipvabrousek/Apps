@@ -62,19 +62,22 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                         
                         if let result = result {
                             
-                            //load website
-                            let data = "https://swift.org"
-                            let adress = URL(string: data)
+                            //  write result
+                            self.str = result.bestTranscription.formattedString
+                            print(self.str)
+                            
+                            //  create alert
+                            self.createAlert(title: "Website will be opened", m: "Here")
+                            self.label.text = "https://\(self.str!).org"
+                            
+                            //  load website
+                            let data = self.label.text
+                            let adress = URL(string: data!)
                             let request = URLRequest(url: adress!)
                             self.webView.loadRequest(request)
                             print(request)
                             
-                            //write text
-                            self.str = result.bestTranscription.formattedString
-                            self.label.text = self.str
-                            
-                            
-                            
+                     
                             
                             
                             if result.isFinal {
@@ -116,13 +119,20 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     
+ 
     
+    func createAlert(title: String, m:String){
+        
+        let alert = UIAlertController(title: title, message: m, preferredStyle: .alert)
+        
+        
+       alert.addAction(UIAlertAction(title: "Hi", style: .default, handler: { (action) in
+        alert.dismiss(animated: true, completion: nil)
+       }))
     
+        self.present(alert, animated: true, completion: nil)
     
-    
-    
-    
-    
+    }
     
     
     
@@ -156,6 +166,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 }
                 
             })
+            
+            
         }
     }
     
