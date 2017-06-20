@@ -195,9 +195,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     
  
 ## Update location
-*  1 - Show location on the map
-*  2 - add polyline
-*  3 - update distance and save location to "locations" array
+* 1 - Show location on the map
+* 2 - add polyline
+* 3 - update distance and save location to "locations" array
 ```swift
  func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
@@ -389,8 +389,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 
 # Activity View Controller
-*  1 - Fetch data
-*  2 - display data from specific index
+* 1 - Fetch data
+* 2 - display data from specific index
 
 ```swift
 import UIKit
