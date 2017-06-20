@@ -197,7 +197,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
 ## Update location
 * 1 - Show location on the map
 * 2 - add polyline
-* 3 - update distance and save location to "locations" array
+* 3 - update distance and save location to "locations" array
+
+
+
 ```swift
  func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
