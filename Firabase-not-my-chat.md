@@ -1,10 +1,7 @@
-//
-//  User.swift
-//  FireSwiffer
-//
-//  Created by Training on 01/07/16.
-//  Copyright © 2016 Training. All rights reserved.
-//
+# Chat
+
+## User
+```swift
 
 import Foundation
 import FirebaseAuth
@@ -29,17 +26,11 @@ struct User {
     }
 }
 
+```
 
 
-
-//
-//  Sweet.swift
-//  FireSwiffer
-//
-//  Created by Training on 01/07/16.
-//  Copyright © 2016 Training. All rights reserved.
-//
-
+##  Sweet
+```swift
 import Foundation
 import FirebaseDatabase
 
@@ -80,19 +71,12 @@ struct Sweet {
     }
     
 }
+```
 
 
+## Sweet-VC
 
-
-
-//
-//  SweetsTableViewController.swift
-//  FireSwiffer
-//
-//  Created by Training on 01/07/16.
-//  Copyright © 2016 Training. All rights reserved.
-//
-
+```swift
 import UIKit
 import FirebaseDatabase
 import FirebaseAuth
@@ -234,5 +218,6 @@ class SweetsTableViewController: UITableViewController {
         }
     }
 }
+```
 
 ![https://www.youtube.com/watch?v=D0MuaFzoxng]
