@@ -86,13 +86,16 @@ class SweetsTableViewController: UITableViewController {
     var dbRef:FIRDatabaseReference!
     var sweets = [Sweet]()
     
+    
+    
+    //---------------------------------------------------------------------------------
     override func viewDidLoad() {
         super.viewDidLoad()
         dbRef = FIRDatabase.database().reference().child("sweet-items")
         startObservingDB()
     }
     
-    
+    //---------------------------------------------------------------------------------
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -107,6 +110,10 @@ class SweetsTableViewController: UITableViewController {
         
     }
     
+    
+    
+    
+    //---------------------------------------------------------------------------------
     @IBAction func loginAndSignUp(sender: AnyObject) {
         
         let userAlert = UIAlertController(title: "Login/Sign up", message: "Enter email and password", preferredStyle: .Alert)
@@ -147,6 +154,11 @@ class SweetsTableViewController: UITableViewController {
         
     }
     
+    
+    
+    
+    
+    //---------------------------------------------------------------------------------
     func startObservingDB () {
         dbRef.observeEventType(.Value, withBlock: { (snapshot:FIRDataSnapshot) in
             var newSweets = [Sweet]()
@@ -164,19 +176,24 @@ class SweetsTableViewController: UITableViewController {
         }
     }
     
+    
+    
+    
+    
+    
+     //---------------------------------------------------------------------------------
     @IBAction func addSweet(sender: AnyObject) {
+    
         let sweetAlert = UIAlertController(title: "New Sweet", message: "Enter your Sweet", preferredStyle: .Alert)
         sweetAlert.addTextFieldWithConfigurationHandler { (textField:UITextField) in
             textField.placeholder = "Your sweet"
         }
+        
         sweetAlert.addAction(UIAlertAction(title: "Send", style: .Default, handler: { (action:UIAlertAction) in
             if let sweetContent = sweetAlert.textFields?.first?.text {
                 let sweet = Sweet(content: sweetContent, addedByUser: "BrianAdvent")
-                
                 let sweetRef = self.dbRef.child(sweetContent.lowercaseString)
-                
                 sweetRef.setValue(sweet.toAnyObject())
-                
             }
         }))
         
@@ -193,16 +210,14 @@ class SweetsTableViewController: UITableViewController {
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-      
-        return sweets.count
+      return sweets.count
     }
 
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+      
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
-
         let sweet = sweets[indexPath.row]
-        
         cell.textLabel?.text = sweet.content
         cell.detailTextLabel?.text = sweet.addedByUser
 
@@ -213,7 +228,6 @@ class SweetsTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             let sweet = sweets[indexPath.row]
-            
             sweet.itemRef?.removeValue()
         }
     }
