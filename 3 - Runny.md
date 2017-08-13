@@ -97,17 +97,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
         let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
         UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
-        UserDefaults.standard.synchronize()
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        UserDefaults.standard.synchronize() 
     }
     
     
@@ -128,23 +118,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         }
     }
     
-    
-    
-    
-    
-   
-    
- 
-    
-    
 }
-
-
-
-
-
-
-
 
 ```
     
@@ -231,8 +205,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         // Dispose of any resources that can be recreated.
     }
     
-    
-    
  ```
     
     
@@ -302,8 +274,6 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     
     
-    
-    
     /*-----------------------------------------------------------VIEW DID APPEAR---------------------------------------------------------
      */
     override func viewDidAppear(_ animated: Bool) {
@@ -318,11 +288,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         progressVal = tempProgress as! Int
         }
         
-        print(progressVal * 100)
-        
-        
-        
-        
+       
         if (progressVal * 100) > 100{
         progressBar.progressTintColor = UIColor.green
       
@@ -351,9 +317,6 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     
 }
-
-
-
 
 ```
 
@@ -449,7 +412,6 @@ class ActivityViewController: UIViewController, MKMapViewDelegate, CLLocationMan
         //--------------------------------------------------
         total = total + Double(decodedRuns[i].distance)!
         
-        
         let progressTotal = Float(total / 100) //1 km will be 0.01 :  10 will be 0.1
         var deserveReward = false
         
@@ -461,13 +423,8 @@ class ActivityViewController: UIViewController, MKMapViewDelegate, CLLocationMan
         UserDefaults.standard.set(progressTotal, forKey: "PROGRESS")
         UserDefaults.standard.set(deserveReward, forKey: "REWARD")
         
-    }
-    
-    
+    }   
 }
-
-
-
 
 ```
 
@@ -478,7 +435,6 @@ import Foundation
 import CoreLocation
 
 class Run: NSObject, NSCoding {
-    
     
     struct Keys {
       
@@ -528,9 +484,6 @@ class Run: NSObject, NSCoding {
             _lon = lonObject
         }
     }
-    
-    
-    
     
     
     func encode(with aCoder: NSCoder) {
@@ -587,12 +540,6 @@ class Run: NSObject, NSCoding {
     
 }
 
-
-
-
-
-
-
 ```
 
 
@@ -605,7 +552,6 @@ class Run: NSObject, NSCoding {
 * 5 - draw gradient in the clipped context of the path
 
 ```swift
-  //  Created by Joel Trew on 24/04/2016.
  
  import MapKit
  
@@ -623,7 +569,6 @@ class Run: NSObject, NSCoding {
             return color.cgColor
         })
     }
-    
     
     
     
@@ -649,7 +594,7 @@ class Run: NSObject, NSCoding {
     override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         
         
-        //  variables -
+        //  variables 
         let baseWidth: CGFloat = self.lineWidth / zoomScale
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let stopValues = calculateNumberOfStops()
@@ -731,11 +676,6 @@ class Run: NSObject, NSCoding {
     }
     
  }
- 
- 
-
-
- 
  
 
 ```
