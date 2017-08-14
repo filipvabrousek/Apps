@@ -1,6 +1,6 @@
 # Chat
 
-```swift```
+```swift
 import Foundation
 import UIKit
 
@@ -25,13 +25,6 @@ appDelegate.window?.rootViewController = vc
 
 # VC
 ```swift
-//
-//  ViewController.swift
-//  Chat
-//
-//  Created by Filip Vabroušek on 14.08.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 import Firebase
