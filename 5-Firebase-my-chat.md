@@ -1,10 +1,13 @@
 # Chat
-1) Add bundleID to Firebase
-2) add ```plist``` Google file
-1) ```pod init```
-2) ```add "Firebase/Database"```, etc to the new PodFile
-3) ```pod install```
-4) open the ```.xcworkspace``` project
+
+1) ```cd Desktop```
+2) ```cd Chaty``
+3) Add bundleID to Firebase
+4) add ```plist``` Google file
+5) ```pod init```
+6) ```add "Firebase/Database"```, etc to the new PodFile
+7) ```pod install```
+8) open the ```.xcworkspace``` project
 
 
 
