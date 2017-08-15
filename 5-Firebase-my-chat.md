@@ -1,4 +1,12 @@
 # Chat
+1) Add bundleID to Firebase
+2) add ```plist``` Google file
+1) ```pod init```
+2) ```add "Firebase/Database"```, etc to the new PodFile
+3) ```pod install```
+4) open the ```.xcworkspace``` project
+
+
 
 ```swift
 import Foundation
