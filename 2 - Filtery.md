@@ -2,6 +2,14 @@
 
 # View Controller
 ```swift
+//
+//  ViewController.swift
+//  SOImagePickerController
+//
+//  Created by myCompany on 9/6/16.
+//  Copyright © 2016 myCompany. All rights reserved.
+//
+
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
@@ -13,10 +21,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBOutlet weak var imgView: UIImageView!
     
-    
-    
     /*------------------------------------------------------SEPIA------------------------------------------------------*/
-    
     @IBAction func sepia(_ sender: Any) {
         let applied = CIFilter(name: "CISepiaTone")
         let begin = CIImage(image: imgView.image!)
@@ -47,10 +52,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    
-    
-    
-    /*------------------------------------------------------DIDFINISHPACKING------------------------------------------------------*/
+    /*------------------------------------------------------DID FINISH PACKING------------------------------------------------------*/
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         imgView.image = info[UIImagePickerControllerEditedImage] as? UIImage
         dismiss(animated: true, completion: nil)
@@ -62,7 +64,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    /*---------------------------------------------------------ACTIONCROPIMAGE---------------------------------------------------------*/
+    /*---------------------------------------------------------ACTION CROP IMAGE---------------------------------------------------------*/
     @IBAction func actionCropImage(_ sender: AnyObject) {
         if imgView.image != nil {
             let objCropVC = SOCropVC()
@@ -94,10 +96,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
 }
-
-
-
-
 
 ```
 
