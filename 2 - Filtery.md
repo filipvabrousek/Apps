@@ -126,25 +126,25 @@ internal protocol SOCropVCDelegate {
 ## SOCropVC class
 
 ```swift
-internal class SOCropVC: UIViewController {
+
+internal class Crop: UIViewController {
+    
     var imgOriginal: UIImage!
     var delegate: SOCropVCDelegate?
     var cropSize: CGSize!
     var isAllowCropping = false
-    
     fileprivate var imgCropped: UIImage!
-    
     fileprivate var imageCropView: SOImageCropView!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.isNavigationBarHidden = true
-        
         self.setupCropView()
     }
+    
+    
     
     
     //------------------------------------------- VIEW WILL LAYOUT SUBVIEWS
@@ -155,7 +155,12 @@ internal class SOCropVC: UIViewController {
     }
     
     
-    //------------------------------------------- SETUP BOTTOM VIEWS
+    /*------------------------------------------- SETUP BOTTOM VIEWS
+     add cancel and crop views and add correposnding actions
+     setup cropview using:
+     "SOImageCropView(frame: self.view.bounds)"
+     */
+    
     func setupBottomViewView() {
         let viewBottom = UIView()
         viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
@@ -207,6 +212,11 @@ internal class SOCropVC: UIViewController {
         self.view.addSubview(self.imageCropView)
     }
 }
+
+
+
+
+
 
 
 ```
