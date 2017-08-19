@@ -2,6 +2,14 @@
 
 # View Controller
 ```swift
+//
+//  ViewController.swift
+//  SOImagePickerController
+//
+//  Created by myCompany on 9/6/16.
+//  Copyright © 2016 myCompany. All rights reserved.
+//
+
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
@@ -59,19 +67,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     /*---------------------------------------------------------ACTION CROP IMAGE---------------------------------------------------------*/
     @IBAction func actionCropImage(_ sender: AnyObject) {
         if imgView.image != nil {
-            let objCropVC = SOCropVC()
-            objCropVC.imgOriginal = imgView.image
-            objCropVC.isAllowCropping = true
-            objCropVC.cropSize = CGSize(width: 320, height: 320)
-            objCropVC.delegate = self
-            self.navigationController?.pushViewController(objCropVC, animated: true)
+            let obj = Crop()
+            obj.imgOriginal = imgView.image
+            obj.isAllowCropping = true
+            obj.cropSize = CGSize(width: 320, height: 320)
+            obj.delegate = self
+            self.navigationController?.pushViewController(obj, animated: true)
         }
     }
     
     
     
     /*---------------------------------------------------------IMAGECROPVC---------------------------------------------------------*/
-    func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage) {
+    func imagecropvc(_ imagecropvc:Crop, finishedcropping:UIImage) {
         imgView.image = finishedcropping
     }
     
@@ -88,6 +96,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
 }
+
+
 
 ```
 
