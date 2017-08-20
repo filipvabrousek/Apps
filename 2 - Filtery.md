@@ -2,6 +2,7 @@
 
 # View Controller
 ```swift
+
 //
 //  ViewController.swift
 //  SOImagePickerController
@@ -12,7 +13,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SOCropVCDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,  SOCropVCDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     
     var delegate: SOCropVCDelegate?
     var context:CIContext = CIContext(options: nil)
@@ -20,17 +21,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     @IBOutlet weak var imgView: UIImageView!
+    @IBOutlet var filterCollectionView: UICollectionView!
     
-    /*------------------------------------------------------SEPIA------------------------------------------------------*/
-    @IBAction func sepia(_ sender: Any) {
-        let applied = CIFilter(name: "CISepiaTone")
-        let begin = CIImage(image: imgView.image!)
-        applied?.setValue(begin, forKey: kCIInputImageKey)
+  
+    /*------------------------------------------------------PROCCESS------------------------------------------------------*/
+    func proccess(){
         
-        let cg = context.createCGImage((applied?.outputImage!)!, from: (applied?.outputImage!.extent)!)
-        let filtered = UIImage(cgImage: cg!)
-        self.imgView.image = filtered
+        let image = Image(image: imgView.image!)
+        let f1 = MixFilter()
+        let f2 = ScaleIntensityFilter(scale: 0.25)
+        let image2 = f1.apply(input: image)
+        let image3 = f2.apply(input: image2)
+        imgView.image = image3.toUIImage()
     }
+    
+    
     
     
     /*------------------------------------------------------SAVE------------------------------------------------------*/
@@ -84,8 +89,31 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     
+    
+    
+    /*---------------------------------------------------------COLLECTION VIEW---------------------------------------------------------*/
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 3
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath as IndexPath) as! FilterCollectionViewCell
+        cell.label.text = "Do"
+        return cell
+        
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        proccess()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.filterCollectionView.delegate = self
+        self.filterCollectionView.dataSource = self
+        
     }
     
     
@@ -100,28 +128,239 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 ```
-
-
-
-
-
-
-
-# SOCropVC
-
-
+## FilterCollectiomViewCell.swift
 ```swift
 import UIKit
-import CoreGraphics
 
-internal protocol SOCropVCDelegate {
-    func imagecropvc(_ imagecropvc:SOCropVC, finishedcropping:UIImage)
+class FilterCollectionViewCell: UICollectionViewCell {
+    
+    @IBOutlet var label: UILabel!
+}
+
+
+
+```
+
+## RGBAPixel.swift
+```swift
+//
+//  RGBAPixel.swift
+//  Filtery-Pro
+//
+//  Created by Filip Vabroušek on 20.08.17.
+//  Copyright © 2017 Filip Vabroušek. All rights reserved.
+//
+
+import UIKit
+
+public struct RGBAPixel {
+    
+    public init(rawVal: UInt32){
+        raw = rawVal
+    }
+    
+    
+    public var raw: UInt32
+    
+    public var red:UInt8 {
+        get { return UInt8(raw & 0xFF) }
+        set { raw = UInt32(newValue) | (raw & 0xFFFFFF00)}
+    }
+    
+    
+    public var green:UInt8 {
+        get { return UInt8( (raw & 0xFF00) >> 8)}
+        set { raw = (UInt32(newValue) << 8) | (raw & 0xFFFF00FF)}
+    }
+    
+    
+    public var blue:UInt8 {
+        get { return UInt8( (raw & 0xFF0000) >> 16) }
+        set { raw = (UInt32(newValue) << 16) | (raw & 0xFF00FFFF)}
+    }
+    
+    
+    public var alpha:UInt8 {
+        get { return UInt8( (raw & 0xFF000000) >> 24) }
+        set { raw = (UInt32(newValue) << 24) | (raw & 0x00FFFFFF)}
+    }
+    
+}
+
+
+
+```
+## Image.swift
+
+```swift
+//
+//  Image.swift
+//  Filtery-Pro
+//
+//  Created by Filip Vabroušek on 20.08.17.
+//  Copyright © 2017 Filip Vabroušek. All rights reserved.
+//
+
+import UIKit
+
+
+public class Image {
+    
+    let pixels: UnsafeMutableBufferPointer<RGBAPixel>
+    let height: Int
+    let width: Int
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let bitmapInfo: UInt32 = CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
+    let bitsPerComponent = Int(8)
+    
+    let bytesPerRow: Int
+    
+    
+    
+    public init(width: Int, height: Int){
+        
+        self.height = height
+        self.width = width
+        bytesPerRow = 4 * width
+        let rawData = UnsafeMutablePointer<RGBAPixel>.allocate(capacity: (width * height))
+        pixels = UnsafeMutableBufferPointer<RGBAPixel>(start: rawData, count: width * height)
+    }
+    
+    
+    
+    
+    public init(image: UIImage){
+        
+        height = Int(image.size.height)
+        width = Int(image.size.width)
+        bytesPerRow = 4 * width
+        
+        let rawData = UnsafeMutablePointer<RGBAPixel>.allocate(capacity: (width * height))
+        let CGPointZero = CGPoint(x: 0, y: 0)
+        let rect = CGRect(origin: CGPointZero, size: image.size)
+        
+        let imageContext = CGContext(data: rawData,
+                                     width: width,
+                                     height: height,
+                                     bitsPerComponent: bitsPerComponent,
+                                     bytesPerRow: bytesPerRow,
+                                     space: colorSpace,
+                                     bitmapInfo: bitmapInfo)
+        
+        imageContext?.draw(image.cgImage!, in: rect)
+        
+        pixels = UnsafeMutableBufferPointer<RGBAPixel>(start: rawData, count: width * height)
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public func toUIImage() -> UIImage{
+        let outContext = CGContext(data: pixels.baseAddress, width: width, height: height, bitsPerComponent: bitsPerComponent,bytesPerRow: bytesPerRow,space: colorSpace,bitmapInfo: bitmapInfo,releaseCallback: nil,releaseInfo: nil)
+        
+        return UIImage(cgImage: outContext!.makeImage()!)
+    }
+    
+    
+    
+    public func getPixel(x: Int, y:Int) -> RGBAPixel{
+        return pixels[x+y*width]
+    }
+    
+    
+    public func setPixel(value: RGBAPixel, x: Int, y:Int) {
+        pixels[x+y*width] = value
+    }
+    
+    
+    public func transformPixels(transformFunc: (RGBAPixel) -> RGBAPixel) -> Image{
+        
+        let newImage = Image(width: self.width, height: self.height)
+        
+        //loop through the pixels
+        
+        
+        for y in 0 ..< height {
+            for x in 0 ..< width {
+                let p1 = getPixel(x: x, y: y)
+                let p2 = transformFunc(p1)
+                newImage.setPixel(value: p2, x: x, y: y)
+            }
+        }
+        return newImage
+    }
+    
 }
 
 
 ```
 
 
+## Filter.swift
+
+
+```swift
+
+import Foundation
+
+
+protocol Filter {    
+    func apply(input: Image) -> Image
+}
+
+```
+
+## Filters.swift
+```swift
+import Foundation
+
+
+class ScaleIntensityFilter: Filter{
+    
+    let scale: Double
+    init(scale: Double){
+        self.scale = scale
+    }
+    
+    func apply(input: Image) -> Image {
+        return input.transformPixels( transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
+            var p = p1
+            p.red = UInt8(Double(p.red) * self.scale)
+            p.green = UInt8(Double(p.green) * self.scale)
+            p.blue = UInt8(Double(p.red) * self.scale)
+            return p
+        })
+    }
+}
+
+
+
+
+
+class MixFilter: Filter{
+    
+    func apply(input: Image) -> Image {
+        return input.transformPixels( transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
+            var p = p1
+            let r = p.red
+            p.red = p.blue
+            p.blue = p.green
+            p.green = r
+            return p
+        })
+    }
+}
+
+
+
+```
 
 ## SOCropVC class
 
