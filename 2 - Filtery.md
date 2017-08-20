@@ -2,15 +2,6 @@
 
 # View Controller
 ```swift
-
-//
-//  ViewController.swift
-//  SOImagePickerController
-//
-//  Created by myCompany on 9/6/16.
-//  Copyright © 2016 myCompany. All rights reserved.
-//
-
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,  SOCropVCDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
