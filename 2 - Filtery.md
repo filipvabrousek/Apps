@@ -134,13 +134,6 @@ class FilterCollectionViewCell: UICollectionViewCell {
 
 ## RGBAPixel.swift
 ```swift
-//
-//  RGBAPixel.swift
-//  Filtery-Pro
-//
-//  Created by Filip Vabroušek on 20.08.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 
@@ -1135,8 +1128,5 @@ internal class SOCropOverlayView: UIView {
         UIRectFill(CGRect(x: widthSpan, y: heightSpan, width: self.cropSize.width, height: self.cropSize.height))
     }
 }
-
-
-
 
 ```
