@@ -89,7 +89,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     /*------------------------------------------------------SHOW FILTER SHEET------------------------------------------------------*/
     func showFilterSheet(){
         
-        // sheet
+        
         let sheet = UIAlertController(title: "Select Filter", message: "Add filter to you photo", preferredStyle: .actionSheet)
         
         let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -206,10 +206,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 import UIKit
 
-
-
 public struct RGBAPixel {
-    
     
     /*-----------------------------------------------------------------------------------------------------------------------------*/
     public init(rawVal: UInt32){
@@ -645,14 +642,15 @@ internal class SOCropBorderView: UIView {
 
 
 ## ScrollView
-
+* calculate position of the handlers
+* 1 - center horiontally
+* 2 - center vertically
+ 
+ 
 ```swift
 private class ScrollView: UIScrollView {
     
     /*------------------------------------------- LAYOUT SUBVIEWS
-     calculate position of the handlers
-     1 - center horiontally
-     2 - center vertically
      */
     
     fileprivate override func layoutSubviews() {
@@ -688,6 +686,16 @@ private class ScrollView: UIScrollView {
 
 
 ## SOImageCropView
+* 1 -  Calculate rect that needs to be cropped
+* 2 - transform visible rect to image orientation using "ORIENTATION TRANSFORMED FOT THE RECT OF THE IMAGE"
+* 3 - finally crop image
+* 4 - first of all, get the size scale by taking a look at the real image dimensions. Here it
+     doesn't matter if you take the width or the hight of the image, because it will always
+     be scaled in the exact same proportion of the real image
+     
+* 5 - get the postion of the cropping rect inside the image
+* 6 - scaled width/height in regards of real width to crop width
+* 7 - extract visible rect from scrollview and scale it
 
 ```swift
 internal class SOImageCropView: UIView, UIScrollViewDelegate {
@@ -780,40 +788,6 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     }
     
     
-    
-    /*------------------------------------------- HIT TEST
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        if !isAllowCropping {
-            return self.scrollView
-        }
-        
-        let resizableCropView = cropOverlayView as! SOResizableCropOverlayView
-        let outerFrame = resizableCropView.cropBorderView.frame.insetBy(dx: -10, dy: -10)
-        
-        if outerFrame.contains(point) {
-            if resizableCropView.cropBorderView.frame.size.width < 60 ||
-                resizableCropView.cropBorderView.frame.size.height < 60 {
-                return super.hitTest(point, with: event)
-            }
-            
-            let innerTouchFrame = resizableCropView.cropBorderView.frame.insetBy(dx: 30, dy: 30)
-            if innerTouchFrame.contains(point) {
-                return self.scrollView
-            }
-            
-            let outBorderTouchFrame = resizableCropView.cropBorderView.frame.insetBy(dx: -10, dy: -10)
-            if outBorderTouchFrame.contains(point) {
-                return super.hitTest(point, with: event)
-            }
-            
-            return super.hitTest(point, with: event)
-        }
-        
-        return self.scrollView
-    }
-    
-    */
-    
     //------------------------------------------- OVERRIDE LAYOUT SUBVIEWS
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -856,9 +830,6 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CROPPED IMAGE
-     1 -  Calculate rect that needs to be cropped
-     2 - transform visible rect to image orientation using "ORIENTATION TRANSFORMED FOT THE RECT OF THE IMAGE"
-     3 - finally crop image
     */
     
     func croppedImage() -> UIImage {
@@ -881,23 +852,16 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CALC VISIBLE RECT FOR RESIZABLE CROP AREA
-     
-     1) first of all, get the size scale by taking a look at the real image dimensions. Here it
-     doesn't matter if you take the width or the hight of the image, because it will always
-     be scaled in the exact same proportion of the real image
-     
-     2) get the postion of the cropping rect inside the image
-     
      */
     
     fileprivate func calcVisibleRectForResizeableCropArea() -> CGRect {
         
-        //1
+        //  4
         let resizableView = cropOverlayView as! SOResizableCropOverlayView
         var sizeScale = self.imageView.image!.size.width / self.imageView.frame.size.width
         sizeScale *= self.scrollView.zoomScale
         
-        //2
+        //  5
         var visibleRect = resizableView.contentView.convert(resizableView.contentView.bounds, to: imageView)
         visibleRect = SOImageCropView.scaleRect(visibleRect, scale: sizeScale)
         return visibleRect
@@ -908,13 +872,11 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CALC VISIBLE RECT FOR CROP AREA
-     1)  scaled width/height in regards of real width to crop width
-     2)  extract visible rect from scrollview and scale it
      */
     
     fileprivate func calcVisibleRectForCropArea() -> CGRect {
         
-        //1
+        //  6
         let scaleWidth = imgCrop!.size.width / cropSize.width
         let scaleHeight = imgCrop!.size.height / cropSize.height
         var scale: CGFloat = 0
@@ -931,7 +893,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
                 max(scaleWidth, scaleHeight)
         }
         
-        // 2
+        // 7
         var visibleRect = scrollView.convert(scrollView.bounds, to:imageView)
         visibleRect = SOImageCropView.scaleRect(visibleRect, scale: scale)
         
@@ -962,8 +924,9 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
         
         return rectTransform.scaledBy(x: image.scale, y: image.scale)
     }
-}
 
+
+}
 
 
 
@@ -976,6 +939,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
 ## SOResizableCropOverlayView
 ```swift
 
+VIEW--------------------------------------------------------------------------------*/
 internal class SOResizableCropOverlayView: SOCropOverlayView {
     fileprivate let kBorderWidth: CGFloat = 12
     
