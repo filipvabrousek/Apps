@@ -370,23 +370,12 @@ protocol AdjustableFilter:Filter {
 
 ## Filters.swift
 ```swift
-//
-//  Filters.swift
-//  Filtery-Pro
-//
-//  Created by Filip Vabroušek on 20.08.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import Foundation
 
 
-
-
-/*---------------------------------------------------------------O FILTER---------------------------------------------------------------
- replace "alpha" with "red" and other colors for "IntensityFilter"
- */
-
+ // replace "alpha" with "red" and other colors for "IntensityFilter"
+ 
 class O: Filter{
     
     let intensity: Double
