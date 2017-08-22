@@ -10,7 +10,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var context:CIContext = CIContext(options: nil)
     var filter: CIFilter!
     
-    // filters
+    
     @IBOutlet var addFilterBtn: UIButton!
     
     @IBOutlet var cropImageLabel: UILabel!
