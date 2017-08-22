@@ -938,7 +938,6 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
 ## SOResizableCropOverlayView
 ```swift
 
-VIEW--------------------------------------------------------------------------------*/
 internal class SOResizableCropOverlayView: SOCropOverlayView {
     fileprivate let kBorderWidth: CGFloat = 12
     
@@ -954,6 +953,8 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     var heightValue: CGFloat!
     var xValue: CGFloat!
     var yValue: CGFloat!
+    
+    
     
     override var frame: CGRect {
         get {
