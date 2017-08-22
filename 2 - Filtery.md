@@ -4,27 +4,120 @@
 ```swift
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,  SOCropVCDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,  SOCropVCDelegate {
     
     var delegate: SOCropVCDelegate?
     var context:CIContext = CIContext(options: nil)
     var filter: CIFilter!
     
+    // filters
+    @IBOutlet var addFilterBtn: UIButton!
+    
+    @IBOutlet var cropImageLabel: UILabel!
+    
+    var filterA:AdjustableFilter?
+    var fvalue: Double = 0.5
+    
     
     @IBOutlet weak var imgView: UIImageView!
-    @IBOutlet var filterCollectionView: UICollectionView!
+    @IBOutlet var slider: UISlider!
     
-  
+    
+    /*------------------------------------------------------SLIDER------------------------------------------------------*/
+    @IBAction func sliderChanged(_ sender: Any) {
+        fvalue = Double(slider.value)
+        print(fvalue)
+    }
+    
+    /*------------------------------------------------------ADAPT------------------------------------------------------*/
+    @IBAction func adapt(_ sender: Any) {
+        adaptIntensity()
+    }
+    
+    /*---------------------------------------------------ADD FILTER----------------------------------------------------*/
+    @IBAction func addFilter(_ sender: Any) {
+        showFilterSheet()
+    }
+    
+    /*----------------------------------------------------ADAPT INTENSITY-----------------------------------------------*/
+    func adaptIntensity(){
+        
+        let image = Image(image: imgView.image!)
+        let f1 = O(intensity: fvalue)
+        let image2 = f1.apply(input: image)
+        imgView.image = image2.toUIImage()
+        
+        
+        UIView.animate(withDuration: 1) {
+            self.addFilterBtn.alpha = 1
+            self.cropImageLabel.alpha = 1
+        }
+        
+    }
+    
     /*------------------------------------------------------PROCCESS------------------------------------------------------*/
     func proccess(){
         
         let image = Image(image: imgView.image!)
         let f1 = MixFilter()
-        let f2 = ScaleIntensityFilter(scale: 0.25)
+        let f2 = O(intensity: 0.6)
         let image2 = f1.apply(input: image)
         let image3 = f2.apply(input: image2)
         imgView.image = image3.toUIImage()
     }
+    
+    
+    
+    
+    /*--------------------------------------------------PREMADE FILTER--------------------------------------------------*/
+    func premadeFilter(){
+        let image = imgView.image
+        let begin = CIImage(image: image!)
+        let filter = CIFilter(name: "CISepiaTone")
+        
+        filter?.setValue(begin, forKey: kCIInputImageKey)
+        filter?.setValue(0.5, forKey: kCIInputIntensityKey)
+        
+        let new = UIImage(ciImage: (filter?.outputImage)!)
+        imgView.image = new
+        
+    }
+    
+    
+    
+    
+    /*------------------------------------------------------SHOW FILTER SHEET------------------------------------------------------*/
+    func showFilterSheet(){
+        
+        // sheet
+        let sheet = UIAlertController(title: "Select Filter", message: "Add filter to you photo", preferredStyle: .actionSheet)
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        let sepia = UIAlertAction(title: "Sepia", style: .default) { (action) in
+            self.premadeFilter()
+        }
+        
+        let custom = UIAlertAction(title: "Custom", style: .default) { (action) in
+            self.proccess()
+        }
+        sheet.addAction(sepia)
+        sheet.addAction(cancel)
+        sheet.addAction(custom)
+        present(sheet, animated: true, completion: nil)
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -82,28 +175,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    /*---------------------------------------------------------COLLECTION VIEW---------------------------------------------------------*/
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 3
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath as IndexPath) as! FilterCollectionViewCell
-        cell.label.text = "Do"
-        return cell
-        
-    }
     
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        proccess()
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.filterCollectionView.delegate = self
-        self.filterCollectionView.dataSource = self
+        
+        addFilterBtn.alpha = 0
+        cropImageLabel.alpha = 0
         
     }
     
@@ -119,26 +198,20 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 ```
-## FilterCollectiomViewCell.swift
-```swift
-import UIKit
 
-class FilterCollectionViewCell: UICollectionViewCell {
-    
-    @IBOutlet var label: UILabel!
-}
-
-
-
-```
 
 ## RGBAPixel.swift
 ```swift
 
+
 import UIKit
+
+
 
 public struct RGBAPixel {
     
+    
+    /*-----------------------------------------------------------------------------------------------------------------------------*/
     public init(rawVal: UInt32){
         raw = rawVal
     }
@@ -172,19 +245,10 @@ public struct RGBAPixel {
 }
 
 
-
 ```
 ## Image.swift
 
 ```swift
-//
-//  Image.swift
-//  Filtery-Pro
-//
-//  Created by Filip Vabroušek on 20.08.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
-
 import UIKit
 
 
@@ -196,11 +260,10 @@ public class Image {
     let colorSpace = CGColorSpaceCreateDeviceRGB()
     let bitmapInfo: UInt32 = CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
     let bitsPerComponent = Int(8)
-    
     let bytesPerRow: Int
     
     
-    
+    /*-----------------------------------------------------------------------------------------------------------------------------*/
     public init(width: Int, height: Int){
         
         self.height = height
@@ -212,7 +275,7 @@ public class Image {
     
     
     
-    
+    /*-----------------------------------------------------------------------------------------------------------------------------*/
     public init(image: UIImage){
         
         height = Int(image.size.height)
@@ -245,7 +308,7 @@ public class Image {
     
     
     
-    
+    /*---------------------------------------------------------TO UIIMAGE--------------------------------------------------------------------*/
     public func toUIImage() -> UIImage{
         let outContext = CGContext(data: pixels.baseAddress, width: width, height: height, bitsPerComponent: bitsPerComponent,bytesPerRow: bytesPerRow,space: colorSpace,bitmapInfo: bitmapInfo,releaseCallback: nil,releaseInfo: nil)
         
@@ -253,7 +316,7 @@ public class Image {
     }
     
     
-    
+    /*------------------------------------------------------------GET AND SET PIXEL-----------------------------------------------------------------*/
     public func getPixel(x: Int, y:Int) -> RGBAPixel{
         return pixels[x+y*width]
     }
@@ -264,12 +327,11 @@ public class Image {
     }
     
     
+    
+    /*------------------------------------------------------------------TRANSFORM PIXELS-----------------------------------------------------------*/
     public func transformPixels(transformFunc: (RGBAPixel) -> RGBAPixel) -> Image{
         
         let newImage = Image(width: self.width, height: self.height)
-        
-        //loop through the pixels
-        
         
         for y in 0 ..< height {
             for x in 0 ..< width {
@@ -284,6 +346,7 @@ public class Image {
 }
 
 
+
 ```
 
 
@@ -291,7 +354,6 @@ public class Image {
 
 
 ```swift
-
 import Foundation
 
 
@@ -299,26 +361,47 @@ protocol Filter {
     func apply(input: Image) -> Image
 }
 
+
+protocol AdjustableFilter:Filter {
+    var value:Double {get set}
+    var min:Double {get}
+    var max:Double {get}
+    var defaultValue:Double {get}
+}
+
+
 ```
 
 ## Filters.swift
 ```swift
+//
+//  Filters.swift
+//  Filtery-Pro
+//
+//  Created by Filip Vabroušek on 20.08.17.
+//  Copyright © 2017 Filip Vabroušek. All rights reserved.
+//
+
 import Foundation
 
 
-class ScaleIntensityFilter: Filter{
+
+
+/*---------------------------------------------------------------O FILTER---------------------------------------------------------------
+ replace "alpha" with "red" and other colors for "IntensityFilter"
+ */
+
+class O: Filter{
     
-    let scale: Double
-    init(scale: Double){
-        self.scale = scale
+    let intensity: Double
+    init(intensity: Double){
+        self.intensity = intensity
     }
     
     func apply(input: Image) -> Image {
         return input.transformPixels( transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
             var p = p1
-            p.red = UInt8(Double(p.red) * self.scale)
-            p.green = UInt8(Double(p.green) * self.scale)
-            p.blue = UInt8(Double(p.red) * self.scale)
+            p.alpha = UInt8(Double(p.alpha) * self.intensity)
             return p
         })
     }
@@ -327,8 +410,9 @@ class ScaleIntensityFilter: Filter{
 
 
 
-
+/*---------------------------------------------------------------MIX FILTER---------------------------------------------------------------*/
 class MixFilter: Filter{
+    
     
     func apply(input: Image) -> Image {
         return input.transformPixels( transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
@@ -344,11 +428,53 @@ class MixFilter: Filter{
 
 
 
+class Intensity:Filter, AdjustableFilter{
+    
+    var value: Double
+    let min:Double = 0.0
+    let max:Double = 0.0
+    let defaultValue:Double = 0.5
+    
+    init(setValue:Double ){
+        self.value = setValue
+    }
+    
+    func apply(input: Image) -> Image {
+        return input.transformPixels(transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
+            var p = p1
+            p.red = UInt8(Double(p.red) * self.value)
+            p.green = UInt8(Double(p.green) * self.value)
+            p.blue = UInt8(Double(p.green) * self.value)
+            return p
+        })
+    }
+}
+
+
+
+
+
+
+
+
+
+
 ```
 
 ## SOCropVC class
 
 ```swift
+import UIKit
+import CoreGraphics
+
+internal protocol SOCropVCDelegate {
+    func imagecropvc(_ imagecropvc:Crop, finishedcropping:UIImage)
+}
+
+
+
+
+/*-----------------------------------------------------------------------CROP----------------------------------------------------------------------------------*/
 
 internal class Crop: UIViewController {
     
@@ -379,12 +505,11 @@ internal class Crop: UIViewController {
     
     
     /*------------------------------------------- SETUP BOTTOM VIEWS
-     add cancel and crop views and add correposnding actions
-     setup cropview using:
-     "SOImageCropView(frame: self.view.bounds)"
+      1 - add bottomView and cancel and crop views and add correposnding actions
      */
     
     func setupBottomViewView() {
+       
         let viewBottom = UIView()
         viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
         viewBottom.backgroundColor = UIColor.darkGray
@@ -412,13 +537,11 @@ internal class Crop: UIViewController {
         
     }
     
-    //------------------------------------------- ACTION CANCEL
+    //------------------------------------------- ACTIONS
     func actionCancel(_ sender: AnyObject?) {
         self.navigationController?.popViewController(animated: true)
     }
     
-    
-    //------------------------------------------- ACTION CROP
     func actionCrop(_ sender: AnyObject) {
         imgCropped = self.imageCropView.croppedImage()
         self.delegate?.imagecropvc(self, finishedcropping:imgCropped)
@@ -426,7 +549,12 @@ internal class Crop: UIViewController {
     }
     
     
-    //------------------------------------------- SETUP CROP VIEWS
+    /*------------------------------------------- SETUP CROP VIEWS
+     2 - setup cropview using:
+     "SOImageCropView(frame: self.view.bounds)"
+     stick the frame to the image
+     */
+    
     fileprivate func setupCropView() {
         self.imageCropView = SOImageCropView(frame: self.view.bounds)
         self.imageCropView.imgCrop = imgOriginal
@@ -436,18 +564,13 @@ internal class Crop: UIViewController {
     }
 }
 
-
-
-
-
-
-
 ```
 
 
 ## SOCropBorderView
 
 ```swift
+/*----------------------------------------------------------------------SO CROP BORDER VIEW-----------------------------------------------------------------------------------*/
 internal class SOCropBorderView: UIView {
     fileprivate let kCircle: CGFloat = 20
     
@@ -462,7 +585,9 @@ internal class SOCropBorderView: UIView {
     }
     
     
-    //------------------------------------------- DRAW
+    /*------------------------------------------- DRAW
+     draw the frame wround cropped image
+     */
     override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         
@@ -479,12 +604,18 @@ internal class SOCropBorderView: UIView {
     }
     
     
-    //------------------------------------------- CALCULATE ALL NEEDED
+    /*------------------------------------------- CALCULATE ALL NEEDED
+     calculate position of the handlers
+     1 - Position handle circles (in the corners and in the middle of the sides)
+     2 - starting with the upper left corner and then following clockwise (topLeft - TL)
+     */
+    
     fileprivate func calculateAllNeededHandleRects() -> [CGRect] {
         
         let width = self.frame.width
         let height = self.frame.height
         
+        // 1
         let leftColX: CGFloat = 0
         let rightColX = width - kCircle
         let centerColX = rightColX / 2
@@ -493,18 +624,17 @@ internal class SOCropBorderView: UIView {
         let bottomRowY = height - kCircle
         let middleRowY = bottomRowY / 2
         
-        //starting with the upper left corner and then following clockwise
-        let topLeft = CGRect(x: leftColX, y: topRowY, width: kCircle, height: kCircle)
-        let topCenter = CGRect(x: centerColX, y: topRowY, width: kCircle, height: kCircle)
-        let topRight = CGRect(x: rightColX, y: topRowY, width: kCircle, height: kCircle)
-        let middleRight = CGRect(x: rightColX, y: middleRowY, width: kCircle, height: kCircle)
-        let bottomRight = CGRect(x: rightColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let bottomCenter = CGRect(x: centerColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let bottomLeft = CGRect(x: leftColX, y: bottomRowY, width: kCircle, height: kCircle)
-        let middleLeft = CGRect(x: leftColX, y: middleRowY, width: kCircle, height: kCircle)
+        //  2
+        let TL = CGRect(x: leftColX, y: topRowY, width: kCircle, height: kCircle)
+        let TC = CGRect(x: centerColX, y: topRowY, width: kCircle, height: kCircle)
+        let TR = CGRect(x: rightColX, y: topRowY, width: kCircle, height: kCircle)
+        let MR = CGRect(x: rightColX, y: middleRowY, width: kCircle, height: kCircle)
+        let BR = CGRect(x: rightColX, y: bottomRowY, width: kCircle, height: kCircle)
+        let BC = CGRect(x: centerColX, y: bottomRowY, width: kCircle, height: kCircle)
+        let BL = CGRect(x: leftColX, y: bottomRowY, width: kCircle, height: kCircle)
+        let ML = CGRect(x: leftColX, y: middleRowY, width: kCircle, height: kCircle)
         
-        return [topLeft, topCenter, topRight, middleRight, bottomRight, bottomCenter, bottomLeft,
-                middleLeft]
+        return [TL, TC, TR, MR, BR, BC, BL, ML]
     }
 }
 
@@ -518,23 +648,30 @@ internal class SOCropBorderView: UIView {
 
 ```swift
 private class ScrollView: UIScrollView {
+    
+    /*------------------------------------------- LAYOUT SUBVIEWS
+     calculate position of the handlers
+     1 - center horiontally
+     2 - center vertically
+     */
+    
     fileprivate override func layoutSubviews() {
         super.layoutSubviews()
         
         if let zoomView = self.delegate?.viewForZooming?(in: self) {
-            let boundsSize = self.bounds.size
+            let size = self.bounds.size
             var frameToCenter = zoomView.frame
             
-            // center horizontally
-            if frameToCenter.size.width < boundsSize.width {
-                frameToCenter.origin.x = (boundsSize.width - frameToCenter.size.width) / 2
+            // 1
+            if frameToCenter.size.width < size.width {
+                frameToCenter.origin.x = (size.width - frameToCenter.size.width) / 2
             } else {
                 frameToCenter.origin.x = 0
             }
             
-            // center vertically
-            if frameToCenter.size.height < boundsSize.height {
-                frameToCenter.origin.y = (boundsSize.height - frameToCenter.size.height) / 2
+            // 2
+            if frameToCenter.size.height < size.height {
+                frameToCenter.origin.y = (size.height - frameToCenter.size.height) / 2
             } else {
                 frameToCenter.origin.y = 0
             }
@@ -543,6 +680,7 @@ private class ScrollView: UIScrollView {
         }
     }
 }
+
 
 ```
 
@@ -572,6 +710,9 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
             height: rect.size.height * scale)
     }
     
+    
+    
+    //------------------------------------------- IMG CROP
     var imgCrop: UIImage? {
         get {
             return self.imageView.image
@@ -581,10 +722,14 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
         }
     }
     
+    
+    
+    //------------------------------------------- CROP SIZE
     var cropSize: CGSize {
         get {
             return self.cropOverlayView.cropSize
         }
+        
         set {
             if let view = self.cropOverlayView {
                 view.cropSize = newValue
@@ -599,6 +744,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
                 self.addSubview(self.cropOverlayView)
             }
         }
+        
     }
     
     
@@ -635,7 +781,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     
-    //------------------------------------------- HIT TEST
+    /*------------------------------------------- HIT TEST
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if !isAllowCropping {
             return self.scrollView
@@ -666,9 +812,9 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
         return self.scrollView
     }
     
+    */
     
-    
-    //------------------------------------------- LAYOUT SUBVIEWS
+    //------------------------------------------- OVERRIDE LAYOUT SUBVIEWS
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -709,17 +855,22 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     
-    //------------------------------------------- CROPPED IMAGE
+    /*------------------------------------------- CROPPED IMAGE
+     1 -  Calculate rect that needs to be cropped
+     2 - transform visible rect to image orientation using "ORIENTATION TRANSFORMED FOT THE RECT OF THE IMAGE"
+     3 - finally crop image
+    */
+    
     func croppedImage() -> UIImage {
-        // Calculate rect that needs to be cropped
+        // 1
         var visibleRect = isAllowCropping ?
             calcVisibleRectForResizeableCropArea() : calcVisibleRectForCropArea()
         
-        // transform visible rect to image orientation
+        // 2
         let rectTransform = orientationTransformedRectOfImage(imgCrop!)
         visibleRect = visibleRect.applying(rectTransform);
         
-        // finally crop image
+        // 3
         let imageRef = imgCrop!.cgImage?.cropping(to: visibleRect)
         let result = UIImage(cgImage: imageRef!, scale: imgCrop!.scale,
                              orientation: imgCrop!.imageOrientation)
@@ -753,9 +904,17 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     }
     
     
-    //------------------------------------------- CALC VISIBLE RECT FOR CROP AREA
+    
+    
+    
+    /*------------------------------------------- CALC VISIBLE RECT FOR CROP AREA
+     1)  scaled width/height in regards of real width to crop width
+     2)  extract visible rect from scrollview and scale it
+     */
+    
     fileprivate func calcVisibleRectForCropArea() -> CGRect {
-        // scaled width/height in regards of real width to crop width
+        
+        //1
         let scaleWidth = imgCrop!.size.width / cropSize.width
         let scaleHeight = imgCrop!.size.height / cropSize.height
         var scale: CGFloat = 0
@@ -772,7 +931,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
                 max(scaleWidth, scaleHeight)
         }
         
-        // extract visible rect from scrollview and scale it
+        // 2
         var visibleRect = scrollView.convert(scrollView.bounds, to:imageView)
         visibleRect = SOImageCropView.scaleRect(visibleRect, scale: scale)
         
@@ -781,17 +940,22 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     
-    //------------------------------------------- ORIENTATION TRANSFORMED REDCT OF IMAGE
+    /*------------------------------------------- ORIENTATION TRANSFORMED REDCT OF IMAGE
+      transform the rectangle, when the orientation of the image changes
+ */
+    
+ 
+    
     fileprivate func orientationTransformedRectOfImage(_ image: UIImage) -> CGAffineTransform {
         var rectTransform: CGAffineTransform!
         
         switch image.imageOrientation {
         case .left:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(M_PI_2)).translatedBy(x: 0, y: -image.size.height)
+            rectTransform = CGAffineTransform(rotationAngle: CGFloat(Double.pi / 2)).translatedBy(x: 0, y: -image.size.height)
         case .right:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-M_PI_2)).translatedBy(x: -image.size.width, y: 0)
+            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2)).translatedBy(x: -image.size.width, y: 0)
         case .down:
-            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-M_PI)).translatedBy(x: -image.size.width, y: -image.size.height)
+            rectTransform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi)).translatedBy(x: -image.size.width, y: -image.size.height)
         default:
             rectTransform = CGAffineTransform.identity
         }
@@ -799,7 +963,6 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
         return rectTransform.scaledBy(x: image.scale, y: image.scale)
     }
 }
-
 
 
 
@@ -872,7 +1035,9 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     }
     
     
-    //------------------------------------------- TOUCHES BEGAN
+    /*------------------------------------------- TOUCHES BEGAN
+     Use "fillMultiplyer()"
+     */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let touchPoint = touch.location(in: cropBorderView)
@@ -932,14 +1097,17 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     
-    //------------------------------------------- CALCULATE ANCHOR BORDER
+    /*------------------------------------------- CALCULATE ANCHOR BORDER
+     1 - Pythagoras is watching you :)
+    */
     fileprivate func calculateAnchorBorder(_ anchorPoint: CGPoint) -> CGPoint {
         let allHandles = getAllCurrentHandlePositions()
         var closest: CGFloat = 3000
         var anchor: CGPoint!
         
         for handlePoint in allHandles {
-            // Pythagoras is watching you :-)
+          
+            // 1
             let xDist = handlePoint.x - anchorPoint.x
             let yDist = handlePoint.y - anchorPoint.y
             let dist = sqrt(xDist * xDist + yDist * yDist)
@@ -953,7 +1121,9 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     
-    //------------------------------------------- GET ALL CURRENT HANDLERS POSITION
+    /*------------------------------------------- GET ALL CURRENT HANDLERS POSITION
+     1 - starting with the upper left corner and then following the rect clockwise
+     */
     fileprivate func getAllCurrentHandlePositions() -> [CGPoint] {
         let leftX: CGFloat = 0
         let rightX = cropBorderView.bounds.size.width
@@ -963,27 +1133,28 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
         let bottomY = cropBorderView.bounds.size.height
         let middleY = topY + (bottomY - topY) / 2
         
-        // starting with the upper left corner and then following the rect clockwise
-        let topLeft = CGPoint(x: leftX, y: topY)
-        let topCenter = CGPoint(x: centerX, y: topY)
-        let topRight = CGPoint(x: rightX, y: topY)
-        let middleRight = CGPoint(x: rightX, y: middleY)
-        let bottomRight = CGPoint(x: rightX, y: bottomY)
-        let bottomCenter = CGPoint(x: centerX, y: bottomY)
-        let bottomLeft = CGPoint(x: leftX, y: bottomY)
-        let middleLeft = CGPoint(x: leftX, y: middleY)
+        // 1
+        let TL = CGPoint(x: leftX, y: topY)
+        let TC = CGPoint(x: centerX, y: topY)
+        let TR = CGPoint(x: rightX, y: topY)
+        let MR = CGPoint(x: rightX, y: middleY)
+        let BR = CGPoint(x: rightX, y: bottomY)
+        let BC = CGPoint(x: centerX, y: bottomY)
+        let BL = CGPoint(x: leftX, y: bottomY)
+        let ML = CGPoint(x: leftX, y: middleY)
         
-        return [topLeft, topCenter, topRight, middleRight, bottomRight, bottomCenter, bottomLeft,
-                middleLeft]
+        return [TL, TC, TR, MR, BR, BC, BL, ML]
     }
     
     
     
     
-    //------------------------------------------- RESIING WITH TOUCH POINT
+    /*------------------------------------------- RESIZING WITH TOUCH POINT
+     This is the place where all the magic happends
+     prevent goint offscreen...
+ */
     fileprivate func resizeWithTouchPoint(_ point: CGPoint) {
-        // This is the place where all the magic happends
-        // prevent goint offscreen...
+        
         let border = kBorderWidth * 2
         var pointX = point.x < border ? border : point.x
         var pointY = point.y < border ? border : point.y
@@ -1010,11 +1181,18 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     
-    //------------------------------------------- PREVENT BORDER FRAME FROM GETTING UP TOO SMALL OR TOO BIG
+    /*------------------------------------------- PREVENT BORDER FRAME FROM GETTING UP TOO SMALL OR TOO BIG
+    1 - get toolbar size using "UserInterfaceIdiom"
+    2 - set "newFrame" dimensions to "CropBorderView" if it exceeds certain width, height or changes its position
+     */
     fileprivate func preventBorderFrameFromGettingTooSmallOrTooBig(_ frame: CGRect) -> CGRect {
+        
+        //  1
         let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
         var newFrame = frame
         
+        
+        // 2
         if newFrame.size.width < 64 {
             newFrame.size.width = cropBorderView.frame.size.width
             newFrame.origin.x = cropBorderView.frame.origin.x
@@ -1070,6 +1248,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     }
 }
 
+
 ```
 
 
@@ -1103,7 +1282,11 @@ internal class SOCropOverlayView: UIView {
     
     
     
-    //------------------------------------------- INIT
+    /*------------------------------------------- DRAW
+     1 - fill outer rect
+     2 - fill inner border
+     3 - fill inner rect
+     */
     override func draw(_ rect: CGRect) {
         
         let toolbarSize = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 0 : 54)
@@ -1114,16 +1297,16 @@ internal class SOCropOverlayView: UIView {
         let heightSpan = floor(height / 2 - self.cropSize.height / 2)
         let widthSpan = floor(width / 2 - self.cropSize.width / 2)
         
-        // fill outer rect
+        // 1
         UIColor(red: 0, green: 0, blue: 0, alpha: 0.5).set()
         UIRectFill(self.bounds)
         
-        // fill inner border
+        // 2
         UIColor(red: 1, green: 1, blue: 1, alpha: 0.5).set()
         UIRectFrame(CGRect(x: widthSpan - 2, y: heightSpan - 2, width: self.cropSize.width + 4,
                            height: self.cropSize.height + 4))
         
-        // fill inner rect
+        // 3
         UIColor.clear.set()
         UIRectFill(CGRect(x: widthSpan, y: heightSpan, width: self.cropSize.width, height: self.cropSize.height))
     }
