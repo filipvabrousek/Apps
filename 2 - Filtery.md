@@ -1,61 +1,117 @@
 # Filtery 
 
-# View Controller
+# Import View Controller
 ```swift
 import UIKit
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,  SOCropVCDelegate {
+class ImportViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    
+    
+    @IBOutlet var imgView: UIImageView!
+    
+    
+    
+    @IBAction func importPhoto(_ sender: Any) {
+        let IP = UIImagePickerController()
+        IP.allowsEditing = true;
+        IP.sourceType = UIImagePickerControllerSourceType.photoLibrary
+        IP.delegate = self
+        present(IP, animated: true, completion: nil)
+        
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        let img = info[UIImagePickerControllerEditedImage] as? UIImage
+        let data = UIImagePNGRepresentation(img!)
+        UserDefaults.standard.set(data, forKey: "saved")
+        
+        imgView.image = img
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Do any additional setup after loading the view.
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    
+    
+    
+}
+
+```
+
+## Edit View Controller
+
+```swift
+import UIKit
+
+class EditViewController: UIViewController, SOCropVCDelegate {
+
+    
+    
+    
+    @IBOutlet var slider: UISlider!
+    
     
     var delegate: SOCropVCDelegate?
     var context:CIContext = CIContext(options: nil)
     var filter: CIFilter!
     
-    @IBOutlet var addFilterBtn: UIButton!
-    @IBOutlet var cropImageLabel: UILabel!
     
-    //filters
+    @IBOutlet var imgView: UIImageView!
+    
+    
     var filterA:AdjustableFilter?
     var fvalue: Double = 0.5
     
     
-    @IBOutlet weak var imgView: UIImageView!
-    @IBOutlet var slider: UISlider!
     
-    
-    /*------------------------------------------------------SLIDER------------------------------------------------------*/
-    @IBAction func sliderChanged(_ sender: Any) {
-        fvalue = Double(slider.value)
-        print(fvalue)
-    }
-    
-    /*------------------------------------------------------ADAPT------------------------------------------------------*/
-    @IBAction func adapt(_ sender: Any) {
-        adaptIntensity()
-    }
-    
-    /*---------------------------------------------------ADD FILTER----------------------------------------------------*/
     @IBAction func addFilter(_ sender: Any) {
         showFilterSheet()
     }
     
-    /*----------------------------------------------------ADAPT INTENSITY-----------------------------------------------*/
-    func adaptIntensity(){
+    func showFilterSheet(){
         
-        let image = Image(image: imgView.image!)
-        let f1 = O(intensity: fvalue)
-        let image2 = f1.apply(input: image)
-        imgView.image = image2.toUIImage()
+        // sheet
+        let sheet = UIAlertController(title: "Select Filter", message: "Add filter to you photo", preferredStyle: .actionSheet)
         
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         
-        UIView.animate(withDuration: 1) {
-            self.addFilterBtn.alpha = 1
-            self.cropImageLabel.alpha = 1
+        let weird = UIAlertAction(title: "Weird", style: .default) { (action) in
+            self.weird()
         }
+        
+        let custom = UIAlertAction(title: "Custom", style: .default) { (action) in
+            self.custom()
+        }
+        
+        
+        sheet.addAction(weird)
+        sheet.addAction(cancel)
+        sheet.addAction(custom)
+        present(sheet, animated: true, completion: nil)
         
     }
     
-    /*------------------------------------------------------PROCCESS------------------------------------------------------*/
-    func proccess(){
+    
+    
+    
+    
+    func custom(){
         
         let image = Image(image: imgView.image!)
         let f1 = MixFilter()
@@ -68,92 +124,56 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    /*--------------------------------------------------PREMADE FILTER--------------------------------------------------*/
-    func premadeFilter(){
-        let image = imgView.image
-        let begin = CIImage(image: image!)
-        let filter = CIFilter(name: "CISepiaTone")
+    
+    func weird(){
         
-        filter?.setValue(begin, forKey: kCIInputImageKey)
-        filter?.setValue(0.5, forKey: kCIInputIntensityKey)
-        
-        let new = UIImage(ciImage: (filter?.outputImage)!)
-        imgView.image = new
-        
+        let image = Image(image: imgView.image!)
+        let f = O(intensity: 0.1)
+        let image2 = f.apply(input: image)
+        imgView.image = image2.toUIImage()
     }
     
     
     
-    
-    /*------------------------------------------------------SHOW FILTER SHEET------------------------------------------------------*/
-    func showFilterSheet(){
-        
-        
-        let sheet = UIAlertController(title: "Select Filter", message: "Add filter to you photo", preferredStyle: .actionSheet)
-        
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
-        let sepia = UIAlertAction(title: "Sepia", style: .default) { (action) in
-            self.premadeFilter()
-        }
-        
-        let custom = UIAlertAction(title: "Custom", style: .default) { (action) in
-            self.proccess()
-        }
-        sheet.addAction(sepia)
-        sheet.addAction(cancel)
-        sheet.addAction(custom)
-        present(sheet, animated: true, completion: nil)
-        
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*------------------------------------------------------SAVE------------------------------------------------------*/
     @IBAction func save(_ sender: Any) {
-        let data =  UIImageJPEGRepresentation(imgView.image!, 0.8)
+        let data = UIImageJPEGRepresentation(imgView.image!, 0.9)
         let compressed = UIImage(data: data!)
         UIImageWriteToSavedPhotosAlbum(compressed!, nil, nil, nil)
     }
     
     
-    /*------------------------------------------------------IMPORT PHOTO------------------------------------------------------*/
-    @IBAction func importPhoto(_ sender: Any) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.allowsEditing = true;
-        imagePicker.sourceType = UIImagePickerControllerSourceType.photoLibrary
-        imagePicker.delegate = self
-        present(imagePicker, animated: true, completion: nil)
+    
+    
+    @IBAction func share(_ sender: Any) {
+        let activityVC = UIActivityViewController(activityItems: [imgView.image], applicationActivities: nil)
+        present(activityVC, animated: true, completion: nil)
+        
+    }
+    
+    @IBAction func adapt(_ sender: Any) {
+        
+        adaptIntensity()
+        
+    }
+    
+    func adaptIntensity(){
+        
+        let image = Image(image: imgView.image!)
+        let f1 = O(intensity: fvalue)
+        let image2 = f1.apply(input: image)
+        imgView.image = image2.toUIImage()
+        
+    }
+    
+    
+    @IBAction func sliderChanged(_ sender: Any) {
+        fvalue = Double(slider.value)
+        print(fvalue)
     }
     
     
     
-    /*------------------------------------------------------DID FINISH PACKING------------------------------------------------------*/
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        imgView.image = info[UIImagePickerControllerEditedImage] as? UIImage
-        dismiss(animated: true, completion: nil)
-    }
-    
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    
-    
-    /*---------------------------------------------------------ACTION CROP IMAGE---------------------------------------------------------*/
-    @IBAction func actionCropImage(_ sender: AnyObject) {
+    @IBAction func cropA(_ sender: Any) {
         if imgView.image != nil {
             let obj = Crop()
             obj.imgOriginal = imgView.image
@@ -166,7 +186,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    /*---------------------------------------------------------IMAGECROPVC---------------------------------------------------------*/
     func imagecropvc(_ imagecropvc:Crop, finishedcropping:UIImage) {
         imgView.image = finishedcropping
     }
@@ -176,27 +195,22 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        addFilterBtn.alpha = 0
-        cropImageLabel.alpha = 0
-        
+        let fetched = UserDefaults.standard.value(forKey: "saved")
+        let realImage = UIImage(data: fetched as! Data)
+        imgView.image = realImage
     }
-    
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    
 }
-
-
-
 ```
+
+
 
 
 ## RGBAPixel.swift
@@ -352,44 +366,42 @@ public class Image {
 ```swift
 import Foundation
 
-
-protocol Filter {    
+protocol Filter{
     func apply(input: Image) -> Image
 }
 
-
-protocol AdjustableFilter:Filter {
-    var value:Double {get set}
-    var min:Double {get}
-    var max:Double {get}
+protocol AdjustableFilter: Filter{
+    var value: Double {get set}
+    var min: Double { get }
+    var max: Double {get }
     var defaultValue:Double {get}
 }
+
 
 
 ```
 
 ## Filters.swift
 ```swift
-
 import Foundation
 
+class O:Filter {
 
- // replace "alpha" with "red" and other colors for "IntensityFilter"
- 
-class O: Filter{
-    
-    let intensity: Double
-    init(intensity: Double){
-        self.intensity = intensity
+    let intensity:Double
+    init(intensity:Double){
+    self.intensity = intensity
     }
+
+    
     
     func apply(input: Image) -> Image {
-        return input.transformPixels( transformFunc: { (p1: RGBAPixel) -> RGBAPixel in
-            var p = p1
-            p.alpha = UInt8(Double(p.alpha) * self.intensity)
-            return p
+        return input.transformPixels( transformFunc: {(p1: RGBAPixel) -> RGBAPixel in
+        var p = p1
+        p.alpha = UInt8(Double(p.alpha) * self.intensity)
+        return p
         })
     }
+    
 }
 
 
@@ -435,18 +447,17 @@ class Intensity:Filter, AdjustableFilter{
     }
 }
 
-
-
-
-
-
-
-
-
-
 ```
 
-## SOCropVC class
+
+
+
+
+
+
+
+
+## Cropclass
 
 ```swift
 import UIKit
@@ -490,11 +501,11 @@ internal class Crop: UIViewController {
     
     
     /*------------------------------------------- SETUP BOTTOM VIEWS
-      1 - add bottomView and cancel and crop views and add correposnding actions
+     1 - add bottomView and cancel and crop views and add correposnding actions
      */
     
     func setupBottomViewView() {
-       
+        
         let viewBottom = UIView()
         viewBottom.frame = CGRect(x: 0, y: self.view.frame.size.height-64, width: self.view.frame.size.width, height: 64)
         viewBottom.backgroundColor = UIColor.darkGray
@@ -555,7 +566,6 @@ internal class Crop: UIViewController {
 ## SOCropBorderView
 
 ```swift
-/*----------------------------------------------------------------------SO CROP BORDER VIEW-----------------------------------------------------------------------------------*/
 internal class SOCropBorderView: UIView {
     fileprivate let kCircle: CGFloat = 20
     
@@ -639,6 +649,9 @@ internal class SOCropBorderView: UIView {
 private class ScrollView: UIScrollView {
     
     /*------------------------------------------- LAYOUT SUBVIEWS
+     calculate position of the handlers
+     1 - center horiontally
+     2 - center vertically
      */
     
     fileprivate override func layoutSubviews() {
@@ -666,7 +679,6 @@ private class ScrollView: UIScrollView {
         }
     }
 }
-
 
 ```
 
@@ -776,6 +788,9 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     }
     
     
+    
+   
+    
     //------------------------------------------- OVERRIDE LAYOUT SUBVIEWS
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -818,7 +833,10 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CROPPED IMAGE
-    */
+     1 -  Calculate rect that needs to be cropped
+     2 - transform visible rect to image orientation using "ORIENTATION TRANSFORMED FOT THE RECT OF THE IMAGE"
+     3 - finally crop image
+     */
     
     func croppedImage() -> UIImage {
         // 1
@@ -840,16 +858,23 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CALC VISIBLE RECT FOR RESIZABLE CROP AREA
+     
+     4) first of all, get the size scale by taking a look at the real image dimensions. Here it
+     doesn't matter if you take the width or the hight of the image, because it will always
+     be scaled in the exact same proportion of the real image
+     
+     5) get the postion of the cropping rect inside the image
+     
      */
     
     fileprivate func calcVisibleRectForResizeableCropArea() -> CGRect {
         
-        //  4
+        //4
         let resizableView = cropOverlayView as! SOResizableCropOverlayView
         var sizeScale = self.imageView.image!.size.width / self.imageView.frame.size.width
         sizeScale *= self.scrollView.zoomScale
         
-        //  5
+        //5
         var visibleRect = resizableView.contentView.convert(resizableView.contentView.bounds, to: imageView)
         visibleRect = SOImageCropView.scaleRect(visibleRect, scale: sizeScale)
         return visibleRect
@@ -860,11 +885,13 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- CALC VISIBLE RECT FOR CROP AREA
+     6)  scaled width/height in regards of real width to crop width
+     7)  extract visible rect from scrollview and scale it
      */
     
     fileprivate func calcVisibleRectForCropArea() -> CGRect {
         
-        //  6
+        //6
         let scaleWidth = imgCrop!.size.width / cropSize.width
         let scaleHeight = imgCrop!.size.height / cropSize.height
         var scale: CGFloat = 0
@@ -891,10 +918,10 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
     
     
     /*------------------------------------------- ORIENTATION TRANSFORMED REDCT OF IMAGE
-      transform the rectangle, when the orientation of the image changes
- */
+     transform the rectangle, when the orientation of the image changes
+     */
     
- 
+    
     
     fileprivate func orientationTransformedRectOfImage(_ image: UIImage) -> CGAffineTransform {
         var rectTransform: CGAffineTransform!
@@ -912,11 +939,7 @@ internal class SOImageCropView: UIView, UIScrollViewDelegate {
         
         return rectTransform.scaledBy(x: image.scale, y: image.scale)
     }
-
-
 }
-
-
 
 ```
 
@@ -942,8 +965,6 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     var heightValue: CGFloat!
     var xValue: CGFloat!
     var yValue: CGFloat!
-    
-    
     
     override var frame: CGRect {
         get {
@@ -1052,14 +1073,14 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     /*------------------------------------------- CALCULATE ANCHOR BORDER
      1 - Pythagoras is watching you :)
-    */
+     */
     fileprivate func calculateAnchorBorder(_ anchorPoint: CGPoint) -> CGPoint {
         let allHandles = getAllCurrentHandlePositions()
         var closest: CGFloat = 3000
         var anchor: CGPoint!
         
         for handlePoint in allHandles {
-          
+            
             // 1
             let xDist = handlePoint.x - anchorPoint.x
             let yDist = handlePoint.y - anchorPoint.y
@@ -1105,7 +1126,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     /*------------------------------------------- RESIZING WITH TOUCH POINT
      This is the place where all the magic happends
      prevent goint offscreen...
- */
+     */
     fileprivate func resizeWithTouchPoint(_ point: CGPoint) {
         
         let border = kBorderWidth * 2
@@ -1135,8 +1156,8 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
     
     
     /*------------------------------------------- PREVENT BORDER FRAME FROM GETTING UP TOO SMALL OR TOO BIG
-    1 - get toolbar size using "UserInterfaceIdiom"
-    2 - set "newFrame" dimensions to "CropBorderView" if it exceeds certain width, height or changes its position
+     1 - get toolbar size using "UserInterfaceIdiom"
+     2 - set "newFrame" dimensions to "CropBorderView" if it exceeds certain width, height or changes its position
      */
     fileprivate func preventBorderFrameFromGettingTooSmallOrTooBig(_ frame: CGRect) -> CGRect {
         
@@ -1202,6 +1223,7 @@ internal class SOResizableCropOverlayView: SOCropOverlayView {
 }
 
 
+
 ```
 
 
@@ -1264,5 +1286,6 @@ internal class SOCropOverlayView: UIView {
         UIRectFill(CGRect(x: widthSpan, y: heightSpan, width: self.cropSize.width, height: self.cropSize.height))
     }
 }
+
 
 ```
