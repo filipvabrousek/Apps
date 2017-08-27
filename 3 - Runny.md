@@ -2,13 +2,6 @@
 
 # View controller
 ```swift
-//
-//  ViewController.swift
-//  Runny
-//
-//  Created by Filip Vabroušek on 13.01.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 import CoreLocation
@@ -165,14 +158,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         UserDefaults.standard.set(items3, forKey: "DATE")
 
         
-        
-        
-        
-        
-        
-        
-        //---------------------
-        
         let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
         UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
         UserDefaults.standard.synchronize()
@@ -226,14 +211,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     
  
 ## VC - UPDATE LOCATION
+* 1 - Show location on the map
+* 2 - add polyline
+* 3 - update distance and save location to "locations" array
+
 ```swift
-  /*-----------------------------------------------------------UPDATE LOCATION---------------------------------------------------------
-     1 - Show location on the map
-     2 - add polyline
-     3 - update distance and save location to "locations" array
-     */
-    
-    
+ 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         //  1
@@ -293,8 +276,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
   ## VC - RENDERER 
  ```swift
    
-    /*---------------------------------------------------------POLYLINE RENDERER-------------------------------------------------------*/
-    
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if overlay is MKPolyline{
             let gradientColors = [UIColor.green, UIColor.blue, UIColor.yellow, UIColor.red]
@@ -506,18 +487,15 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 
 # Activity View Controller
-* 1 - Fetch data
-* 2 - display data from specific index
+* 1 - decode runs
+* 2 - add date and distance
+* 3 - display duration
+* 4 - get pace
+* 5 - dipsplay location on map
+* 6 - get location title
+* 7 - count total ran km's
 
 ```swift
-
-//
-//  ActivityViewController.swift
-//  Runny
-//
-//  Created by Filip Vabroušek on 21.01.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 import MapKit
@@ -533,29 +511,16 @@ class ActivityViewController: UIViewController, MKMapViewDelegate, CLLocationMan
     @IBOutlet var distanceLabel: UILabel!
     @IBOutlet var locationLabel: UILabel!
     @IBOutlet var durationLabel: UILabel!
-
-    
     @IBOutlet var paceLabel: UILabel!
-    
-    
-    
     @IBOutlet var map: MKMapView!
     
     var total = 0.0
     
     
     
-    
-    
-    
+   
     /*-----------------------------------------------------------VIEW DID LOAD---------------------------------------------------------
-     1 - decode runs
-     2 - add date and distance
-     3 - display duration
-     4 - get pace
-     5 - dipsplay location on map
-     6 - get location title
-     7 - count total ran km's
+    1 - 7
      */
     
     
@@ -780,7 +745,6 @@ class ActivityTableViewCell: UITableViewCell {
 ```swift
 
 import Foundation
-//import CoreLocation
 
 class Run: NSObject, NSCoding {
     
@@ -958,16 +922,6 @@ class Run: NSObject, NSCoding {
     
     
     
-    
-    /*---------------------------------------------------------DRAW--------------------------------------------------------------
-     
-     1 - create a gradient
-     2 - define path properties
-     3 - replace path with stroked version, so we can clip
-     4 - create bounding box
-     5 - draw gradient in the clipped context of the path
-     
-     */
     
     override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         
