@@ -11,7 +11,7 @@
     
   func custom() {
 	let b = Blend(numberOfPulses: 1, radius: 50, position: btn.center)
-	b.dur = 1
+	// b.dur = 1
 	b.backgroundColor = UIColor.white.cgColor
 	self.view.layer.insertSublayer(b, above: btn.layer)
 	btn.alpha = 0.6
