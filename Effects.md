@@ -132,7 +132,7 @@ public class Blend: CALayer{
         super.init(coder: aDecoder)
     }
     
-    init(numberOfPulses:Float = Float.infinity, radius: CGFloat, position: CGPoint){
+    public init(numberOfPulses:Float = Float.infinity, radius: CGFloat, position: CGPoint){
         
         super.init()
         
@@ -184,7 +184,7 @@ public class Blend: CALayer{
         self.group.timingFunction = defaultCurve
         self.group.animations = [createOpacityAnimation(), createScaleAnimation()]
     }
-
+    
 }
 
 ```
