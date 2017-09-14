@@ -263,4 +263,52 @@ class CircleButton: UIButton {
 }
 
 
+
+class NotifButton: UIButton{
+    
+    override func awakeFromNib() {
+        self.layer.cornerRadius = 8
+        self.tintColor = UIColor.white
+        self.backgroundColor = UIColor(red: 26 / 255.0, green: 188 / 255.0, blue: 156 / 255.0, alpha: 1)
+        
+        
+        // self.backgroundColor = UIColor(hue: 198.6 , saturation: 91.3, brightness: 100, alpha: 1)
+        
+        let layer = CAShapeLayer()
+        layer.path = UIBezierPath(roundedRect: CGRect(x: 0, y:0, width:self.frame.width / 5, height:10), cornerRadius: 50).cgPath
+        layer.fillColor = UIColor.red.cgColor
+        self.layer.insertSublayer(layer, at: 0)
+        
+        
+        
+    }
+    
+    
+}
+
+
+
+
+
+class EmitButton: UIButton {
+
+    
+    override func awakeFromNib() {
+        let emitLayer = CAEmitterLayer()
+        emitLayer.emitterPosition = CGPoint(x: 0, y: self.frame.height / 2)
+        
+        let cell = CAEmitterCell()
+        cell.birthRate = 100
+        cell.lifetime = 2
+        cell.velocity = 100
+        cell.scale = 0.1
+        
+        
+        cell.emissionRange = CGFloat.pi / 8
+        cell.contents = UIImage(named: "icon.png")!.cgImage
+        emitLayer.emitterCells = [cell]
+        self.layer.addSublayer(emitLayer)
+    }
+    
+
 ```
