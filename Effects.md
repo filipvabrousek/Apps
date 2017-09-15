@@ -506,3 +506,4 @@ func frameForCircle(withViewCenter viewCenter:CGPoint, size viewSize:CGSize, sta
 
 
 ```
+* dismiss method in the second VC
