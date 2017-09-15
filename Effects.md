@@ -28,6 +28,87 @@ func blury() {
 
 
 
+
+
+
+## Blend effect layer
+```swift
+public class Blend: CALayer{
+    
+    var group = CAAnimationGroup()
+    
+    var initalPulseScale: Float = 0
+    var nextPulseAfter: TimeInterval = 0
+    var dur: TimeInterval = 1.5
+    var radius: CGFloat = 200
+    var numberOfPulses: Float = Float.infinity
+    
+    
+    override init(layer: Any) {
+        super.init(layer: layer)
+    }
+    
+    required public init?(coder aDecoder: NSCoder){
+        super.init(coder: aDecoder)
+    }
+    
+    public init(numberOfPulses:Float = Float.infinity, radius: CGFloat, position: CGPoint){
+        
+        super.init()
+        
+        
+        self.backgroundColor = UIColor.black.cgColor
+        self.contentsScale = UIScreen.main.scale
+        self.opacity = 0
+        self.radius = radius
+        self.numberOfPulses = numberOfPulses
+        self.position = position
+        self.bounds = CGRect(x: 0, y: 0, width: radius * 2, height: radius * 2)
+        self.cornerRadius = 0.9 * self.bounds.size.width
+        
+        
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
+            self.setupAnimationGroup()
+            DispatchQueue.main.async {
+                self.add(self.group, forKey: "pulse")
+            }
+        }
+    }
+    
+    
+    
+    func createOpacityAnimation() -> CAKeyframeAnimation{
+        let opacityAnimation = CAKeyframeAnimation(keyPath: "opacity")
+        opacityAnimation.duration = dur
+        opacityAnimation.values = [0.4, 0.8, 0]
+        opacityAnimation.keyTimes = [0, 0.2, 1]
+        return opacityAnimation
+    }
+    
+    func createScaleAnimation() -> CABasicAnimation {
+        
+        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale.xy")
+        scaleAnimation.fromValue = NSNumber(value: initalPulseScale)
+        scaleAnimation.toValue = NSNumber(value: 1)
+        scaleAnimation.duration = dur
+        return scaleAnimation
+    }
+    
+    
+    func setupAnimationGroup(){
+        self.group = CAAnimationGroup()
+        self.group.duration = dur + nextPulseAfter
+        self.group.repeatCount = numberOfPulses
+        
+        let defaultCurve = CAMediaTimingFunction(name: kCAMediaTimingFunctionDefault)
+        self.group.timingFunction = defaultCurve
+        self.group.animations = [createOpacityAnimation(), createScaleAnimation()]
+    }
+    
+}
+
+```
+
 ## UIButton extensions
 ```swift
 import UIKit
@@ -107,85 +188,6 @@ extension UIButton {
     
 }
 
-
-```
-
-
-## Blend effect layer
-```swift
-public class Blend: CALayer{
-    
-    var group = CAAnimationGroup()
-    
-    var initalPulseScale: Float = 0
-    var nextPulseAfter: TimeInterval = 0
-    var dur: TimeInterval = 1.5
-    var radius: CGFloat = 200
-    var numberOfPulses: Float = Float.infinity
-    
-    
-    override init(layer: Any) {
-        super.init(layer: layer)
-    }
-    
-    required public init?(coder aDecoder: NSCoder){
-        super.init(coder: aDecoder)
-    }
-    
-    public init(numberOfPulses:Float = Float.infinity, radius: CGFloat, position: CGPoint){
-        
-        super.init()
-        
-        
-        self.backgroundColor = UIColor.black.cgColor
-        self.contentsScale = UIScreen.main.scale
-        self.opacity = 0
-        self.radius = radius
-        self.numberOfPulses = numberOfPulses
-        self.position = position
-        self.bounds = CGRect(x: 0, y: 0, width: radius * 2, height: radius * 2)
-        self.cornerRadius = 0.9 * self.bounds.size.width
-        
-        
-        DispatchQueue.global(qos: DispatchQoS.QoSClass.default).async {
-            self.setupAnimationGroup()
-            DispatchQueue.main.async {
-                self.add(self.group, forKey: "pulse")
-            }
-        }
-    }
-    
-    
-    
-    func createOpacityAnimation() -> CAKeyframeAnimation{
-        let opacityAnimation = CAKeyframeAnimation(keyPath: "opacity")
-        opacityAnimation.duration = dur
-        opacityAnimation.values = [0.4, 0.8, 0]
-        opacityAnimation.keyTimes = [0, 0.2, 1]
-        return opacityAnimation
-    }
-    
-    func createScaleAnimation() -> CABasicAnimation {
-        
-        let scaleAnimation = CABasicAnimation(keyPath: "transform.scale.xy")
-        scaleAnimation.fromValue = NSNumber(value: initalPulseScale)
-        scaleAnimation.toValue = NSNumber(value: 1)
-        scaleAnimation.duration = dur
-        return scaleAnimation
-    }
-    
-    
-    func setupAnimationGroup(){
-        self.group = CAAnimationGroup()
-        self.group.duration = dur + nextPulseAfter
-        self.group.repeatCount = numberOfPulses
-        
-        let defaultCurve = CAMediaTimingFunction(name: kCAMediaTimingFunctionDefault)
-        self.group.timingFunction = defaultCurve
-        self.group.animations = [createOpacityAnimation(), createScaleAnimation()]
-    }
-    
-}
 
 ```
 
