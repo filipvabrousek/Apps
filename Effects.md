@@ -504,3 +504,40 @@ func frameForCircle(withViewCenter viewCenter:CGPoint, size viewSize:CGSize, sta
 
 ```
 * dismiss method in the second VC
+
+
+## Parallax effect
+
+```swift
+ override func viewDidLoad() {
+        super.viewDidLoad()
+
+        apply(toView: background, magnitude: 23)
+        apply(toView: image, magnitude: -50)
+    }
+
+```
+
+```swift
+    func apply(toView: UIView, magnitude: CGFloat){
+        
+        let xMotion = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
+        xMotion.minimumRelativeValue = -magnitude
+        xMotion.maximumRelativeValue = magnitude
+        
+        let yMotion = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
+        yMotion.minimumRelativeValue = -magnitude
+        yMotion.maximumRelativeValue = magnitude
+        
+        
+        let group = UIMotionEffectGroup()
+        group.motionEffects = [xMotion, yMotion]
+        
+        view.addMotionEffect(group)
+        
+    }
+
+
+
+```
+
