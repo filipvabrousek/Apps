@@ -322,29 +322,24 @@ class EmitButton: UIButton {
 class Transition: NSObject {
     
     var circle = UIView()
+    var circleColor = UIColor.white
+    var dur = 0.3
     
     var startingPoint = CGPoint.zero {
         
         didSet{
             circle.center = startingPoint
         }
-        
     }
     
     
-    var circleColor = UIColor.white
-    var dur = 0.3
-    
-    
     enum Mode: Int {
-        
         case present, dismiss, pop
     }
     
     var transitionMode:Mode = .present
-    
-    
 }
+
 
 
 
@@ -408,7 +403,7 @@ extension Transition: UIViewControllerAnimatedTransitioning {
                 let viewCenter = returningView.center
                 let viewSize = returningView.frame.size
                 
-                //circle.frame = add the method
+                circle.frame = frameForCircle(withViewCenter: viewCenter, size: viewSize, startingPoint: startingPoint)
                 
                 circle.layer.cornerRadius = circle.frame.size.height / 2
                 circle.center = startingPoint
