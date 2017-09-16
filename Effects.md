@@ -551,17 +551,7 @@ class react{
 
 
 ```
-## Parallax effect
 
-```swift
- override func viewDidLoad() {
-        super.viewDidLoad()
-
-        apply(toView: background, magnitude: 23)
-        apply(toView: image, magnitude: -50)
-    }
-
-```
 
 ## Circle motion
 ```
@@ -634,6 +624,17 @@ func handleCircle(gesture: UIPanGestureRecognizer){
 
 ```
 ## Parallax
+
+```swift
+ override func viewDidLoad() {
+        super.viewDidLoad()
+
+        apply(toView: background, magnitude: 23)
+        apply(toView: image, magnitude: -50)
+    }
+
+```
+
 ```swift
     func apply(toView: UIView, magnitude: CGFloat){
         
