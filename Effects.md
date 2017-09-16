@@ -505,7 +505,52 @@ func frameForCircle(withViewCenter viewCenter:CGPoint, size viewSize:CGSize, sta
 ```
 * dismiss method in the second VC
 
+## React on events
 
+* in viewDidLoad
+```swift
+ let g = react(on: "swipe", target: self, action: #selector(handleSwipe(from:))).apply()
+ self.view.addGestureRecognizer(g)
+
+```
+
+```swift
+class react{
+    
+    var on: String
+    var target: UIViewController
+    
+    var action: Selector
+    
+    init(on:String, target: UIViewController, action: Selector) {
+        self.on = on
+        self.target = target
+        self.action = action
+        
+    }
+    
+    func apply() -> UIGestureRecognizer{
+        
+        var res = UIGestureRecognizer()
+        
+        switch on {
+        case "pan":
+            res = UIPanGestureRecognizer(target: target, action: action)
+        case "swipe":
+            res = UISwipeGestureRecognizer(target: target, action: action)
+            
+        default:
+            print("Not defined")
+        }
+        
+        return res
+        
+    }
+    
+}
+
+
+```
 ## Parallax effect
 
 ```swift
@@ -540,4 +585,6 @@ func frameForCircle(withViewCenter viewCenter:CGPoint, size viewSize:CGSize, sta
 
 
 ```
+
+
 
