@@ -563,6 +563,77 @@ class react{
 
 ```
 
+## Circle motion
+```
+ var animator: UIViewPropertyAnimator = UIViewPropertyAnimator()
+ var cc: CGPoint = CGPoint()
+
+```
+* into viewDidLoad():
+
+```swift
+var circle = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+circle.center = self.view.center
+circle.backgroundColor = UIColor.orange
+circle.layer.cornerRadius = 50.0
+self.view.addSubview(circle)
+        
+        
+let pga = UIPanGestureRecognizer(target: self, action: #selector(handleCircle(gesture:)))
+circle.addGestureRecognizer(pga)
+   
+let timing = UICubicTimingParameters(controlPoint1: CGPoint(x:0, y:0.5), controlPoint2: CGPoint(x: 1, y: 1.5))
+animator = UIViewPropertyAnimator(duration: 1.0, timingParameters: timing)
+animator.isInterruptible = true
+
+
+```
+
+
+```swift
+func handleCircle(gesture: UIPanGestureRecognizer){
+        
+        let target = gesture.view!
+        
+        
+        switch gesture.state {
+            
+        case .began:
+            if animator != nil && animator.isRunning{
+                animator.stopAnimation(false)
+            }
+            
+            cc = target.center
+            
+        case .changed:
+            let translation = gesture.translation(in: self.view)
+            target.center = CGPoint(x: cc.x + translation.x, y: cc.y + translation.y)
+            
+        case .ended:
+            
+            let v = gesture.velocity(in: target)
+            let velocity = CGVector(dx: v.x / 500, dy: v.y / 500)
+            let spring = UISpringTimingParameters(mass: 2.5, stiffness: 70, damping: 55, initialVelocity: velocity)
+            animator = UIViewPropertyAnimator(duration: 0.0, timingParameters: spring)
+            
+            animator.addAnimations {
+                target.center = self.view.center
+                
+            }
+            
+            animator.startAnimation()
+            
+        default:
+            break
+        }
+        
+        
+        
+    }
+
+
+```
+## Parallax
 ```swift
     func apply(toView: UIView, magnitude: CGFloat){
         
