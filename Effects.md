@@ -623,6 +623,73 @@ func handleCircle(gesture: UIPanGestureRecognizer){
 
 
 ```
+
+
+
+## Move class
+
+```swift
+let e = Move(view: circle, in: "up", dur: 20, delay: 2, spring: 2, v: 6)
+        e.perform()
+
+```
+
+
+
+```swift
+class Move {
+    var view:UIView
+    var direction:String
+    var dur: TimeInterval
+    var delay:TimeInterval
+    var spring: CGFloat
+    var v:CGFloat
+    
+    
+    init(view: UIView, in direction:String, dur:TimeInterval, delay: TimeInterval, spring: CGFloat, v: CGFloat){
+        
+        self.view = view
+        self.direction = direction
+        self.dur = dur
+        self.delay = delay
+        self.spring = spring
+        self.v = v
+        
+    }
+    
+    
+    
+    
+    
+    func perform(){
+        
+        var e = UIView.animate(withDuration: dur, delay: delay, usingSpringWithDamping: spring, initialSpringVelocity: v, options: [.curveEaseInOut], animations: {
+            
+        }, completion: nil)
+        
+        
+        
+        switch direction {
+
+        case "up":
+            e = UIView.animate(withDuration: dur, delay: delay, usingSpringWithDamping: spring, initialSpringVelocity: v, options: [.curveEaseInOut], animations: {
+                self.view.frame = CGRect(x: self.view.frame.origin.x, y:20, width: self.view.frame.width, height: self.view.frame.height)
+            }, completion: nil)
+            
+            
+        default:
+            break
+            
+        }
+    }
+}
+
+
+
+
+
+
+```
 ## Parallax
 
 ```swift
