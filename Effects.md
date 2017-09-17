@@ -585,7 +585,7 @@ func handleCircle(gesture: UIPanGestureRecognizer){
 
 ```swift
 let e = Move(view: circle, in: "up", dur: 20, delay: 2, spring: 2, v: 6)
-        e.perform()
+e.perform()
 
 ```
 
@@ -611,9 +611,6 @@ class Move {
         self.v = v
         
     }
-    
-    
-    
     
     
     func perform(){
