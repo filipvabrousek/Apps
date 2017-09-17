@@ -663,17 +663,27 @@ class Move {
     
     func perform(){
         
-        var e = UIView.animate(withDuration: dur, delay: delay, usingSpringWithDamping: spring, initialSpringVelocity: v, options: [.curveEaseInOut], animations: {
-            
-        }, completion: nil)
-        
+        var anim = UIView.animate(withDuration: dur,
+                                  delay: delay,
+                                  usingSpringWithDamping: spring,
+                                  initialSpringVelocity: v,
+                                  options: [.curveEaseInOut],
+                                  animations: {}, completion: nil)
         
         
         switch direction {
-
+            
         case "up":
-            e = UIView.animate(withDuration: dur, delay: delay, usingSpringWithDamping: spring, initialSpringVelocity: v, options: [.curveEaseInOut], animations: {
-                self.view.frame = CGRect(x: self.view.frame.origin.x, y:20, width: self.view.frame.width, height: self.view.frame.height)
+            anim = UIView.animate(withDuration: dur, delay: delay,
+                                  usingSpringWithDamping: spring,
+                                  initialSpringVelocity: v,
+                                  options: [.curveEaseInOut], animations: {
+                                    
+                                    self.view.frame = CGRect(x: self.view.frame.origin.x,
+                                                             y:10,
+                                                             width: self.view.frame.width,
+                                                             height: self.view.frame.height)
+                                    
             }, completion: nil)
             
             
@@ -683,6 +693,7 @@ class Move {
         }
     }
 }
+
 
 
 
