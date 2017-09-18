@@ -6,11 +6,7 @@ import UIKit
 
 class ImportViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    
-    
     @IBOutlet var imgView: UIImageView!
-    
-    
     
     @IBAction func importPhoto(_ sender: Any) {
         let IP = UIImagePickerController()
