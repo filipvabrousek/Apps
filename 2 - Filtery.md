@@ -57,20 +57,12 @@ import UIKit
 
 class EditViewController: UIViewController, SOCropVCDelegate {
 
-    
-    
-    
     @IBOutlet var slider: UISlider!
-    
+     @IBOutlet var imgView: UIImageView!
     
     var delegate: SOCropVCDelegate?
     var context:CIContext = CIContext(options: nil)
     var filter: CIFilter!
-    
-    
-    @IBOutlet var imgView: UIImageView!
-    
-    
     var filterA:AdjustableFilter?
     var fvalue: Double = 0.5
     
@@ -185,10 +177,6 @@ class EditViewController: UIViewController, SOCropVCDelegate {
     func imagecropvc(_ imagecropvc:Crop, finishedcropping:UIImage) {
         imgView.image = finishedcropping
     }
-    
-    
-    
-    
     
     
     override func viewDidLoad() {
