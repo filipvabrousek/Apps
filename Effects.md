@@ -698,11 +698,17 @@ class react{
 ## Generate buttons
 
 ```swift
-let b = Btn(vc: self, title: "Hi", color: UIColor.white, background: UIColor.green)
-b.add(x: 60, y: 60)
+ let b = Btn(vc: self, title: "Hi", color: UIColor.white, background: UIColor.green, target: #selector(make))
+ b.add(x: 60, y: 60)
+
+
+func make(){
+        print("hello")
+    }
 ```
 
 ```swift
+
 
 class Btn {
     
@@ -710,15 +716,16 @@ class Btn {
     var title:String
     var color: UIColor
     var background: UIColor
+    var target:Selector
     
     
-    
-    init(vc: UIViewController, title: String, color: UIColor, background: UIColor){
+    init(vc: UIViewController, title: String, color: UIColor, background: UIColor, target:Selector){
         
         self.vc = vc
         self.title = title
         self.color = color
         self.background = background
+        self.target = target
     }
     
     
@@ -728,15 +735,10 @@ class Btn {
         button.setTitle(title, for: [])
         button.tintColor = color
         button.backgroundColor = background
-        
+        button.addTarget(self, action: target, for: .touchUpInside)
         vc.view.addSubview(button)
-        
-        
     }
-    
 }
-
-
 
 ```
 
