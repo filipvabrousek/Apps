@@ -695,6 +695,50 @@ class react{
 
 ```
 
+## Generate buttons
+
+```swift
+let b = Btn(vc: self, title: "Hi", color: UIColor.white, background: UIColor.green)
+b.add(x: 60, y: 60)
+```
+
+```swift
+
+class Btn {
+    
+    var vc: UIViewController
+    var title:String
+    var color: UIColor
+    var background: UIColor
+    
+    
+    
+    init(vc: UIViewController, title: String, color: UIColor, background: UIColor){
+        
+        self.vc = vc
+        self.title = title
+        self.color = color
+        self.background = background
+    }
+    
+    
+    func add(x: CGFloat, y:CGFloat){
+        let button = UIButton()
+        button.frame = CGRect(x: x, y: y, width: 100, height: 60)
+        button.setTitle(title, for: [])
+        button.tintColor = color
+        button.backgroundColor = background
+        
+        vc.view.addSubview(button)
+        
+        
+    }
+    
+}
+
+
+
+```
 
 
 ## Parallax
