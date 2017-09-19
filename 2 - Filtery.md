@@ -139,9 +139,7 @@ class EditViewController: UIViewController, SOCropVCDelegate {
     }
     
     @IBAction func adapt(_ sender: Any) {
-        
         adaptIntensity()
-        
     }
     
     func adaptIntensity(){
@@ -185,11 +183,6 @@ class EditViewController: UIViewController, SOCropVCDelegate {
         let fetched = UserDefaults.standard.value(forKey: "saved")
         let realImage = UIImage(data: fetched as! Data)
         imgView.image = realImage
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 }
 ```
