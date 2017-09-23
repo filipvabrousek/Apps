@@ -124,7 +124,7 @@ class EditViewController: UIViewController, SOCropVCDelegate {
     
     
     @IBAction func save(_ sender: Any) {
-        let data = UIImageJPEGRepresentation(imgView.image!, 0.9)
+        let data = UIImageJPEGRepresentation(imgView.image!, 1.0)
         let compressed = UIImage(data: data!)
         UIImageWriteToSavedPhotosAlbum(compressed!, nil, nil, nil)
     }
