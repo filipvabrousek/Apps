@@ -86,7 +86,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         startBtn.isHidden = true
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.increaseTimer), userInfo: nil, repeats: true)
         LM.startUpdatingLocation()
-        
         travelled = 0
         secDuration = 0
     }
@@ -95,9 +94,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     /*-----------------------------------------------------------FINISH---------------------------------------------------------*/
     
     @IBAction func finishRun(_ sender: Any) {
-        
-        
-        
+ 
         LM.stopUpdatingLocation()
         timer.invalidate()
         
@@ -113,28 +110,15 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         // appending to activities - checking if we have some value
         
         if Double(dividedDistance) != 0.000000 && dur != 0{
-            
-            
-            
             let run = Run(date: result, distance: distS, lat: llat, lon: llon, duration: dur)
             activities.append(run)
-            
-            
-            
-            
-            
-            
-            
-            
+           
             //---------------------
             
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
             UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
             UserDefaults.standard.synchronize()
-            
-            
-            
-            
+           
         }
         
     }
