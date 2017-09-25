@@ -3,9 +3,21 @@
 # View controller
 ```swift
 
+//
+//  ViewController.swift
+//  Runny
+//
+//  Created by Filip Vabroušek on 13.01.17.
+//  Copyright © 2017 Filip Vabroušek. All rights reserved.
+//
+
 import UIKit
-import CoreLocation
 import MapKit
+import CoreLocation
+import CoreData
+
+
+
 
 
 // variable initializations
@@ -46,11 +58,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     // arrays
     lazy var locations = [CLLocation]()
     var myLocations: [CLLocation] = []
-   
     
     
-   
-  
+    
+    
+    
     /*-----------------------------------------------------------VIEW DID LOAD---------------------------------------------------------*/
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,6 +72,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         map.showsUserLocation = true
         map.mapType = MKMapType.standard
         map.delegate = self
+        
+        proccessCoreData()
     }
     
     
@@ -81,7 +95,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     /*-----------------------------------------------------------FINISH---------------------------------------------------------*/
     
     @IBAction func finishRun(_ sender: Any) {
-      
+        
         
         
         LM.stopUpdatingLocation()
@@ -97,84 +111,40 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         let dur = Int(secDuration)
         
         // appending to activities - checking if we have some value
-
-        if Double(dividedDistance) != 0.000000{
-          
         
-
-        let run = Run(date: result, distance: distS, lat: llat, lon: llon, duration: dur)
-        activities.append(run)
-        
-        
-        
-        
-        //--------DIS NO CRASH----------
-        let dis = run.distance
-        let itemsObject = UserDefaults.standard.object(forKey: "DISTANCE")
-        var items1: [String]
-        
-      
-        if let tempItems = itemsObject as? [String]{
-        
-        items1 = tempItems
-        items1.append(dis)
-        } else {
-        items1 = [dis]
-        }
-        
-        UserDefaults.standard.set(items1, forKey: "DISTANCE")
-        
-        
-        //--------DUR NO CRASH----------
-        let durs = String(run.duration)
-        let itemsObject2 = UserDefaults.standard.object(forKey: "DURATION")
-        var items2: [String]
-        
-        
-        if let tempItems = itemsObject2 as? [String]{
+        if Double(dividedDistance) != 0.000000 && dur != 0{
             
-            items2 = tempItems
-            items2.append(durs)
-        } else {
-            items2 = [durs]
-        }
-        
-        UserDefaults.standard.set(items2, forKey: "DURATION")
-        
-        //--------DT NO CRASH----------
-        let dt = String(run.date)
-        let itemsObject3 = UserDefaults.standard.object(forKey: "DATE")
-        var items3: [String]
-        
-        
-        if let tempItems = itemsObject3 as? [String]{
             
-            items3 = tempItems
-            items3.append(dt!)
-        } else {
-            items3 = [dt!]
+            
+            let run = Run(date: result, distance: distS, lat: llat, lon: llon, duration: dur)
+            activities.append(run)
+            
+            
+            
+            
+            
+            
+            
+            
+            //---------------------
+            
+            let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
+            UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
+            UserDefaults.standard.synchronize()
+            
+            
+            
+            
         }
         
-        UserDefaults.standard.set(items3, forKey: "DATE")
-
-        
-        let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
-        UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
-        UserDefaults.standard.synchronize()
-        
-        
-        
-        
-    }
-    
     }
     
     
     
     
     /*-----------------------------------------------------------TIMER---------------------------------------------------------*/
-    func increaseTimer(){
-       
+    @objc func increaseTimer(){
+        
         secDuration += 1
         
         if sec < 60{
@@ -182,7 +152,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             timerLabel.text = String(minutes) + ":" + String(sec)
             
             if sec < 10 && minutes < 10{
-            timerLabel.text = String("0\(minutes):0\(sec)")
+                timerLabel.text = String("0\(minutes):0\(sec)")
             }
             
         } else {
@@ -191,19 +161,58 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
             timerLabel.text = String(minutes) + ":" + String(sec)
             
         }
+  
+    }
+    
+ 
+    func proccessCoreData(){
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let context = delegate.persistentContainer.viewContext
+        let a = NSEntityDescription.insertNewObject(forEntityName: "Activities", into: context)
+        a.setValue(10, forKey: "distance")
+        a.setValue("2017", forKey: "date")
+        a.setValue(200, forKey: "duration")
+        a.setValue(10, forKey: "lon")
+        a.setValue(20, forKey: "lat")
+        // date distance duration lat lon
         
+        do {
+            try context.save()
+            print("Saved")
+            
+        }
+            
+        catch {
+            print("There was an error")
+        }
         
-       
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName:"Activities")
+        request.returnsObjectsAsFaults = false
         
+        do {
+            let results = try context.fetch(request)
+            
+            if (results.count > 0){
+                for result in results as! [NSManagedObject]{
+                    if let dist = result.value(forKey: "distance") as? Double{
+                        print(dist)
+                    }
+                }
+            }
+        }
+            
+        catch {
+            
+        }
     }
     
     
     
     
+  
     
-   
-
-
+    
+}
 
 
 ```
@@ -217,6 +226,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
 
 ```swift
  
+    /*-----------------------------------------------------------UPDATE LOCATION---------------------------------------------------------
+     1 - Show location on the map
+     2 - add polyline
+     3 - update distance and save location to "locations" array
+     */
+    
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         //  1
@@ -276,7 +292,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
   ## VC - RENDERER 
  ```swift
    
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+      func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if overlay is MKPolyline{
             let gradientColors = [UIColor.green, UIColor.blue, UIColor.yellow, UIColor.red]
             let polylineRenderer = ColorLine(polyline: overlay as! MKPolyline, colors: gradientColors)
@@ -287,15 +303,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         return MKPolylineRenderer()
     }
     
-    
    
-    
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
+  
     
 }
     
