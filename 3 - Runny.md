@@ -9,8 +9,6 @@ import CoreData
 
 
 
-
-
 // variable initializations
 var LM = CLLocationManager()
 var travelled:Double = 0
