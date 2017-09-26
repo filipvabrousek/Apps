@@ -98,7 +98,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     }
     
     func getAndSaveData(){
-        // data
+     
+     
         let dividedDistance = travelled / 1000
         formatter.dateFormat = "dd.MM.yyyy"
         let result = formatter.string(from: date)
@@ -107,36 +108,26 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         let llon = AL.coordinate.longitude
         let dur = Int(secDuration)
         
-        // appending to activities - checking if we have some value
         
+        
+        // appending to activities - checking if we have some value
         if Double(dividedDistance) != 0.000000 && dur != 0{
             
             let run = Run(date: result, distance: distS, lat: llat, lon: llon, duration: dur)
             activities.append(run)
-            
-            
-            
-            
-            //---------------------
-            
+  
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
             UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
             UserDefaults.standard.synchronize()
-            
-            
-            
             
             let delegate = UIApplication.shared.delegate as! AppDelegate
             let context = delegate.persistentContainer.viewContext
             let a = NSEntityDescription.insertNewObject(forEntityName: "Activities", into: context)
             
             //  let durr = Double(secDuration)
-            
             a.setValue(result, forKey: "date")
             
-            
             // CLLocationDegree to Double
-            
             
             do {
                 try context.save()
@@ -180,14 +171,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
     }
     
-    
-  
-
-
-
-
-
-
+ 
 ```
     
     
@@ -198,13 +182,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
 * 3 - update distance and save location to "locations" array
 
 ```swift
- 
-    /*-----------------------------------------------------------UPDATE LOCATION---------------------------------------------------------
-     1 - Show location on the map
-     2 - add polyline
-     3 - update distance and save location to "locations" array
-     */
-    
     
     /*-----------------------------------------------------------UPDATE LOCATION---------------------------------------------------------
      1 - Show location on the map
@@ -287,9 +264,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         return MKPolylineRenderer()
     }
     
-    
-    
-    
+  
 }
     
    
@@ -503,13 +478,6 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 ```swift
 
-//
-//  ActivityViewController.swift
-//  Runny
-//
-//  Created by Filip Vabroušek on 21.01.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 import MapKit
