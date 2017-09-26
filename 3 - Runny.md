@@ -97,9 +97,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         timer.invalidate()
     }
     
-    func getAndSaveData(){
-     
-     
+ func getAndSaveData(){
+        // data
         let dividedDistance = travelled / 1000
         formatter.dateFormat = "dd.MM.yyyy"
         let result = formatter.string(from: date)
@@ -108,40 +107,44 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         let llon = AL.coordinate.longitude
         let dur = Int(secDuration)
         
-        
-        
         // appending to activities - checking if we have some value
+        
         if Double(dividedDistance) != 0.000000 && dur != 0{
             
             let run = Run(date: result, distance: distS, lat: llat, lon: llon, duration: dur)
             activities.append(run)
-  
+            
+            
+            
+            // save to UD
+            
             let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: activities)
             UserDefaults.standard.set(encodedData, forKey: "ACTIVITIES")
             UserDefaults.standard.synchronize()
             
+            
+            
+            // save to CoreData
             let delegate = UIApplication.shared.delegate as! AppDelegate
             let context = delegate.persistentContainer.viewContext
-            let a = NSEntityDescription.insertNewObject(forEntityName: "Activities", into: context)
+            let entity = NSEntityDescription.entity(forEntityName: "Activities", in: context)
+            let device = NSManagedObject(entity: entity!, insertInto: context)
+            let data = NSKeyedArchiver.archivedData(withRootObject: activities)
             
-            //  let durr = Double(secDuration)
-            a.setValue(result, forKey: "date")
-            
-            // CLLocationDegree to Double
+            device.setValue(data, forKey: "activityArray")
             
             do {
                 try context.save()
-                print("Saved")
-                
+                print("SavedArr2")
             }
-                
-            catch {
-                print("There was an error")
+            catch{
+                print("Sth went wrong \(error)")
             }
-            
             
             
         }
+    }
+    
     }
     
     
