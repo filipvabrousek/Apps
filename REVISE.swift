@@ -1,18 +1,7 @@
-//
-//  ViewController.swift
-//  Revise
-//
-//  Created by Filip Vabroušek on 01.05.18.
-//  Copyright © 2018 Filip Vabroušek. All rights reserved.
-//
-
 import UIKit
 import MapKit
 import CoreLocation
 import CoreData
-
-var i = 0;
-
 
 class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
@@ -51,8 +40,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     let context = delegate.persistentContainer.viewContext
     let entity = NSEntityDescription.entity(forEntityName: "Activities", in: context)
     let device = NSManagedObject(entity: entity!, insertInto: context)
-    let data = NSKeyedArchiver.archivedData(withRootObject: activities)
-    device.setValue(date, forKey: "activityArray")
+   // let data = NSKeyedArchiver.archivedData(withRootObject: activities)
+    device.setValue(obj, forKey: "activityArray")
         
         do{
         try context.save()
@@ -109,8 +98,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         map.mapType = MKMapType.standard
         map.delegate = self
     }
-    
-  
 
 }
 
@@ -119,13 +106,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
 
 
 
-//
-//  Activity.swift
-//  Revise
-//
-//  Created by Filip Vabroušek on 02.05.18.
-//  Copyright © 2018 Filip Vabroušek. All rights reserved.
-//
+
 
 import Foundation
 
@@ -191,36 +172,31 @@ class Activity: NSObject, NSCoding{
 
 
 
-//
-//  HistoryViewController.swift
-//  Revise
-//
-//  Created by Filip Vabroušek on 02.05.18.
-//  Copyright © 2018 Filip Vabroušek. All rights reserved.
-//
 
 import UIKit
 import CoreData
 
 class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let fetched = [Activity]()
+    var fetched = [Activity]()
+    @IBOutlet var tableView: UITableView!
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        fetchData()
         return fetched.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.textLabel?.text = "HoHoHo!"
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.textLabel?.text = fetched[indexPath.row].distance
         return cell
     }
     
+
+    
    
     func fetchData(){
-       print("Try to fetch")
-     
-        
+        fetched.removeAll()
         
         let delegate = UIApplication.shared.delegate as! AppDelegate
         let context = delegate.persistentContainer.viewContext
@@ -228,23 +204,17 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Activities")
         request.returnsObjectsAsFaults = false
         
-        let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: fetched)
         
         do{
             let results = try context.fetch(request)
             
-            if (results.count > 0){
+            if results.count > 0{
                 for res in results as! [NSManagedObject] {
-                    if let distance = res.value(forKey: "activityArray") as? NSArray {
-                        if let dec = NSKeyedUnarchiver.unarchiveObject(with: encodedData) as? [Activity] {
-                            print("\(dec[0].distance)")
-                        }
+                    if let run = res.value(forKey: "activityArray") as? Activity{
+                        fetched.append(run)
                     }
                 }
-                print("Count \(results.count)")
             }
-            
-            
         }
             
         catch{
@@ -253,13 +223,10 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        fetchData()
+
+    override func viewDidAppear(_ animated: Bool) {
+        tableView.delegate = self
+        tableView.dataSource = self
     }
 
-
 }
-
-
