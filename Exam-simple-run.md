@@ -1,3 +1,6 @@
+
+## Main VC
+```swift
 import UIKit
 import MapKit
 import CoreLocation
@@ -99,87 +102,14 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     }
 
 }
+```
 
 
 
 
 
-
-
-import Foundation
-
-class Activity: NSObject, NSCoding{
-   
-    
-    struct Keys {
-        static let date = "date"
-        static let distance = "distance"
-    }
-    
-    private var _date = ""
-    private var _distance = ""
-    
-    
-    override init(){}
-    
-    init(date: String, distance: String){
-    self._date = date
-    self._distance = distance
-    }
-    
-
-    
-    required init?(coder aDecoder: NSCoder) {
-        if let dateObject = aDecoder.decodeObject(forKey: Keys.date) as? String{
-            _date = dateObject
-        }
-        
-        if let distObject = aDecoder.decodeObject(forKey: Keys.distance) as? String{
-        _distance = distObject
-        }
-        
-    }
-    
-    func encode(with aCoder: NSCoder) {
-        aCoder.encode(_date, forKey: Keys.date)
-        aCoder.encode(_distance, forKey: Keys.distance)
-    }
-    
-    var date:String{
-        get{
-            return _date
-        }
-        
-        set{
-            _date = newValue
-        }
-    }
-    
-    var distance: String{
-        get{
-            return _distance
-        }
-        
-        set{
-            _distance = newValue
-        }
-    }
-    
-}
-
-
-
-
-
-
-//
-//  HistoryViewController.swift
-//  Revise
-//
-//  Created by Filip Vabroušek on 02.05.18.
-//  Copyright © 2018 Filip Vabroušek. All rights reserved.
-//
-
+## HistoryVC
+```swift
 import UIKit
 import CoreData
 
@@ -242,3 +172,68 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 // Entity: Activities, attribute: activityArray, type: transformable
 
+
+
+## Activity class
+```swift
+import Foundation
+
+class Activity: NSObject, NSCoding{
+   
+    
+    struct Keys {
+        static let date = "date"
+        static let distance = "distance"
+    }
+    
+    private var _date = ""
+    private var _distance = ""
+    
+    
+    override init(){}
+    
+    init(date: String, distance: String){
+    self._date = date
+    self._distance = distance
+    }
+    
+
+    
+    required init?(coder aDecoder: NSCoder) {
+        if let dateObject = aDecoder.decodeObject(forKey: Keys.date) as? String{
+            _date = dateObject
+        }
+        
+        if let distObject = aDecoder.decodeObject(forKey: Keys.distance) as? String{
+        _distance = distObject
+        }
+        
+    }
+    
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(_date, forKey: Keys.date)
+        aCoder.encode(_distance, forKey: Keys.distance)
+    }
+    
+    var date:String{
+        get{
+            return _date
+        }
+        
+        set{
+            _date = newValue
+        }
+    }
+    
+    var distance: String{
+        get{
+            return _distance
+        }
+        
+        set{
+            _distance = newValue
+        }
+    }
+    
+}
+```
