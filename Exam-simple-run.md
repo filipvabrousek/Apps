@@ -14,7 +14,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     @IBOutlet var startBtn: UIButton!
     var AL: CLLocation = CLLocation(latitude: 0, longitude: 0)
     var locations = [CLLocation]()
-   // var activities = [Activity]()
     let LM = CLLocationManager()
     var travelled = 0.0
     let formatter = DateFormatter()
@@ -35,7 +34,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     let date = formatter.string(from: Date())
     let distance = String(travelled / 1000)
     let obj = Activity(date: date, distance: distance)
-    //activities.append(obj)
     LM.stopUpdatingLocation()
    
     // save activity array to core data
