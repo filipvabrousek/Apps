@@ -25,6 +25,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         startBtn.isHidden = true
     }
    
+   
     @IBAction func finish(_ sender: Any) {
     // create activity
     formatter.dateFormat = "dd.MM.yyyy"
