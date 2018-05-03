@@ -11,7 +11,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     @IBOutlet var startBtn: UIButton!
     var AL: CLLocation = CLLocation(latitude: 0, longitude: 0)
     var locations = [CLLocation]()
-    var activities = [Activity]()
+   // var activities = [Activity]()
     let LM = CLLocationManager()
     var travelled = 0.0
     let formatter = DateFormatter()
@@ -30,9 +30,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // create activity
     formatter.dateFormat = "dd.MM.yyyy"
     let date = formatter.string(from: Date())
-    let distance = String(travelled)
+    let distance = String(travelled / 1000)
     let obj = Activity(date: date, distance: distance)
-    activities.append(obj)
+    //activities.append(obj)
     LM.stopUpdatingLocation()
    
     // save activity array to core data
@@ -78,7 +78,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 }
                 self.label.text = String(travelled / 1000)
                 self.locations.append(location)
-                print(travelled / 1000)
             }
         }
         
@@ -100,7 +99,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     }
 
 }
-
 
 
 
@@ -173,6 +171,15 @@ class Activity: NSObject, NSCoding{
 
 
 
+
+//
+//  HistoryViewController.swift
+//  Revise
+//
+//  Created by Filip Vabroušek on 02.05.18.
+//  Copyright © 2018 Filip Vabroušek. All rights reserved.
+//
+
 import UIKit
 import CoreData
 
@@ -188,7 +195,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = fetched[indexPath.row].distance
+        cell.textLabel?.text = "\(fetched[indexPath.row].distance) km"
         return cell
     }
     
@@ -230,3 +237,8 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
 
 }
+
+
+
+// Entity: Activities, attribute: activityArray, type: transformable
+
