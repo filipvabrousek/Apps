@@ -1,4 +1,4 @@
-
+* **CoreData:** *Entity*: Activities, *attribute*: activityArray, *type*: transformable
 ## Main VC
 ```swift
 import UIKit
@@ -18,15 +18,12 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     var travelled = 0.0
     let formatter = DateFormatter()
  
-    
-
-    
+ 
     @IBAction func start(_ sender: Any) {
         // without timer, as simple as possible running app with permanent data storage
         LM.startUpdatingLocation()
         startBtn.isHidden = true
     }
-    
    
     @IBAction func finish(_ sender: Any) {
     // create activity
@@ -41,7 +38,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     let context = delegate.persistentContainer.viewContext
     let entity = NSEntityDescription.entity(forEntityName: "Activities", in: context)
     let device = NSManagedObject(entity: entity!, insertInto: context)
-   // let data = NSKeyedArchiver.archivedData(withRootObject: activities)
     device.setValue(obj, forKey: "activityArray")
         
         do{
@@ -166,10 +162,7 @@ class HistoryViewController: UIViewController, UITableViewDelegate, UITableViewD
 
 }
 
-
-
-// Entity: Activities, attribute: activityArray, type: transformable
-
+```
 
 
 ## Activity class
