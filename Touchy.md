@@ -2,6 +2,24 @@
 * allows you to add clean buttons to your app
 
 
+## Simple button
+```swift
+class Simple:UIButton{
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        self.frame.size = CGSize(width: 200, height: 60)
+        self.layer.cornerRadius = 30
+        self.tintColor = UIColor.white
+        self.backgroundColor = UIColor.green
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+    }
+}
+```
+
+
+
+## To do:
 ```swift
 import UIKit
 
@@ -31,18 +49,6 @@ class ComplexSimple:UIButton{
     }
 }
 
-
-class Simple:UIButton{
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        
-        self.frame.size = CGSize(width: 200, height: 60)
-        self.layer.cornerRadius = 30
-        self.tintColor = UIColor.white
-        self.backgroundColor = UIColor.green
-        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
-    }
-}
 
 
 extension UIButton{
