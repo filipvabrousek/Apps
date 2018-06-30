@@ -1,11 +1,8 @@
-//
-//  wow.swift
-//  Nice
-//
-//  Created by Filip Vabroušek on 30.06.18.
-//  Copyright © 2018 Filip Vabroušek. All rights reserved.
-//
+## Touchy
+* allows you to add clean buttons to your app
 
+
+```swift
 import UIKit
 
 
@@ -64,14 +61,11 @@ extension UIButton{
 }
 
 /*
- class StartButton: UIButton {
- 
- override func awakeFromNib() {
- super.awakeFromNib()
- 
- self.frame.size = CGSize(width: 200, height: 60)
- self.layer.cornerRadius = 30
- self.layer.backgroundColor = UIColor(red: 10.2, green: 73.7, blue: 61.2, alpha: 1.0).cgColor
- }
- }
- */
+in VIEW DID LOAD:
+
+ let btn = Simple()
+ btn.frame = CGRect(x: 10, y: 10, width: 200, height: 100)
+ btn.titleLabel?.text = "Hi"
+ self.view.addSubview(btn)
+*/
+```
