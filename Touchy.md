@@ -1,4 +1,4 @@
-## Touchy
+# Touchy
 * allows you to add clean buttons to your app
 
 
