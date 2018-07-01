@@ -1,10 +1,25 @@
 # Touchy
 * allows you to add clean buttons to your app
 
-
-## Simple button
+## Flat
 ```swift
-class Simple:UIButton{
+class Flat:UIButton{
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        self.frame.size = CGSize(width: 160, height: 60)
+        self.tintColor = UIColor.black
+        self.backgroundColor = UIColor.white
+        self.layer.borderColor = UIColor.black.cgColor
+        self.layer.borderWidth = 1.0
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
+    }
+}
+```
+
+## Round 
+```swift
+class Round:UIButton{
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -17,9 +32,9 @@ class Simple:UIButton{
 }
 ```
 
-## Round buttoon
+## Circle 
 ```swift
-class Round: UIButton{
+class Circle: UIButton{
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -31,6 +46,9 @@ class Round: UIButton{
     }
 }
 ```
+
+
+
 
 ## Animations
 ```swift
