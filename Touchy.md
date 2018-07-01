@@ -17,6 +17,21 @@ class Simple:UIButton{
 }
 ```
 
+## Round buttoon
+```swift
+class Round: UIButton{
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        self.frame.size = CGSize(width: 60, height: 60)
+        self.layer.cornerRadius = 0.5 * self.bounds.width
+        self.layer.backgroundColor = UIColor.green.cgColor
+        self.tintColor = UIColor.white
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 30)
+    }
+}
+```
+
 
 
 ## To do:
