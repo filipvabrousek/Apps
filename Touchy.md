@@ -53,7 +53,7 @@ extension UIButton{
 ## Usage:
 
 ```swift
- @IBOutlet var plusBtn: Round!
+@IBOutlet var plusBtn: Round!
  
 @IBAction func spring(_ sender: Any) {
       plusBtn.squezze(to: 0.2, dur: 0.6)
