@@ -32,6 +32,37 @@ class Round: UIButton{
 }
 ```
 
+## Animations
+```swift
+extension UIButton{
+    func squezze(to amount: CGFloat, dur:TimeInterval){
+        UIView.animate(withDuration: dur) {
+            self.alpha = amount
+            self.frame.size = CGSize(width: self.frame.width - 3.0, height: self.frame.height - 3.0)
+        }
+    }
+    
+    func stretch(width w: CGFloat, height h:CGFloat, dur:TimeInterval){
+        UIView.animate(withDuration: dur) {
+            self.frame.size = CGSize(width: self.frame.width + w, height: self.frame.height + h)
+        }
+    }  
+}
+```
+
+## Usage:
+
+```swift
+ @IBOutlet var plusBtn: Round!
+ 
+@IBAction func spring(_ sender: Any) {
+      plusBtn.squezze(to: 0.2, dur: 0.6)
+      plusBtn.stretch(width: 10.0, height: 10.0, dur: 0.8)
+}
+```
+
+
+
 
 
 ## To do:
