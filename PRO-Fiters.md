@@ -1,14 +1,5 @@
 ## Image class
 ```swift
-
-//
-//  Image.swift
-//  Filtery
-//
-//  Created by Filip Vabroušek on 23.08.17.
-//  Copyright © 2017 Filip Vabroušek. All rights reserved.
-//
-
 import UIKit
 
 
@@ -150,6 +141,25 @@ class Intensity:Filter, AdjustableFilter{
     }
 }
 
+
+class O:Filter {
+
+    let intensity:Double
+    init(intensity:Double){
+    self.intensity = intensity
+    }
+
+    
+    
+    func apply(input: Image) -> Image {
+        return input.transformPixels( transformFunc: {(p1: RGBAPixel) -> RGBAPixel in
+        var p = p1
+        p.alpha = UInt8(Double(p.alpha) * self.intensity)
+        return p
+        })
+    }
+    
+}
 
 
 ```
