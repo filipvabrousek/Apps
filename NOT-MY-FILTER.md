@@ -1,5 +1,8 @@
-## First
+
+
+## Saturation
 ```swift
+
 import UIKit
 import CoreImage
 import Foundation
@@ -41,30 +44,16 @@ extension Processable {
     }
 }
 
-```
 
 
-## Saturationable
-```swift
-import CoreImage
+
 
 protocol Saturationable: Processable {
-    var minSaturationValue: Float { get }
-    var maxSaturationValue: Float { get }
     var currentSaturationValue: Float { get }
     func saturation(_ saturation: Float)
 }
 
 extension Saturationable {
-    
-    var minSaturationValue: Float {
-        return 0.00
-    }
-    
-    var maxSaturationValue: Float {
-        return 2.00
-    }
-    
     var currentSaturationValue: Float {
         return filter.value(forKey: kCIInputSaturationKey) as? Float ?? 1.00
     }
@@ -73,40 +62,41 @@ extension Saturationable {
         self.filter.setValue(saturation, forKey: kCIInputSaturationKey)
     }
 }
-```
 
 
 
-## Color control
-```swift
-class ColorControl: Saturationable {
-    
-    // MARK: - Properties
-    
+
+
+class ColorControl: Saturationable  {
     let filter = CIFilter(name: "CIColorControls")!
 }
-
 ```
 
 
-## slide
+## Usage
 ```swift
-    @IBAction func saturationUISliderPressed(_ sender: UISlider) {
-        if let indexPath = self.visibleCurrentCell {
-            let cell = self.collectionView.cellForItem(at: indexPath) as! MultipleColorCell
-            colorControlsFilter.setValue(sender.value, forKey: kCIInputSaturationKey)
-            self.saturationLabel.text = "Saturation \(sender.value)"
-            
-            if let outputImage = self.colorControlsFilter.outputImage {
-                if let cgImageNew = self.ciImageContext.createCGImage(outputImage, from: outputImage.extent) {
-                    let newImg = UIImage(cgImage: cgImageNew)
-                    cell.imageView.image = newImg
-                }
-            }
-        }
-        
-        print("Saturation: \(sender.value)")
-    }
-}
 
+import UIKit
+import CoreGraphics
+
+class ViewController: UIViewController {
+    
+    fileprivate var colorControl = ColorControl()
+    @IBOutlet var imgView: UIImageView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        imgView.image = UIImage(named: "iceland.jpg")
+        colorControl.input(imgView.image!)
+        
+    }
+    
+    
+    @IBAction func slide(_ sender: UISlider) {
+        
+        DispatchQueue.main.async {
+            self.colorControl.saturation(sender.value)
+            self.imgView.image = self.colorControl.outputUIImage()
+        }
+    }
 ```
