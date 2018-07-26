@@ -2,7 +2,7 @@
 
 ## Saturation
 ```swift
-....
+...
   override func viewDidLoad() {
         super.viewDidLoad()
         imgView.image = UIImage(named: "iceland.jpg")
