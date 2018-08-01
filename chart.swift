@@ -1,117 +1,126 @@
-//
-//  ViewController.swift
-//  BarChartLiveStream
-//
-//  Created by Brian Voong on 3/12/17.
-//  Copyright © 2017 Lets Build That App. All rights reserved.
-//
+override func drawInContext(ctx: CGContext!)
+    {
+        if let curveValues = toneCurveEditor?.curveValues
+        {
+            var path = UIBezierPath()
+    
+            let margin = 20
+            let thumbRadius = 15
+            let widgetWidth = Int(frame.width)
+            let widgetHeight = Int(frame.height) - margin - margin - thumbRadius - thumbRadius
 
-import UIKit
-
-class ViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
-    
-    let cellId = "cellId"
-    
-    let values: [CGFloat] = [200, 330, 400, 800] // dist * 100 (
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        collectionView?.backgroundColor = .white
-        
-        collectionView?.register(BarCell.self, forCellWithReuseIdentifier: cellId)
-        
-        (collectionView?.collectionViewLayout as? UICollectionViewFlowLayout)?.scrollDirection = .horizontal
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 4
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return values.count
-    }
-    
-    func maxHeight() -> CGFloat {
-        return view.frame.height - 20 - 44 - 8
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! BarCell
-        
-        if let max = values.max() {
-            let value = values[indexPath.item]
-            let ratio = value / max
+            var interpolationPoints : [CGPoint] = [CGPoint]()
             
-            cell.barHeightConstraint?.constant = maxHeight() * ratio
+            for (i: Int, value: Double) in enumerate(curveValues)
+            {
+                let pathPointX = i * (widgetWidth / curveValues.count) + (widgetWidth / curveValues.count / 2)
+                let pathPointY = thumbRadius + margin + widgetHeight - Int(Double(widgetHeight) * value)
+                
+                interpolationPoints.append(CGPoint(x: pathPointX,y: pathPointY))
+            }
+     
+            path.interpolatePointsWithHermite(interpolationPoints)
+       
+            CGContextSetLineJoin(ctx, kCGLineJoinRound)
+            CGContextAddPath(ctx, path.CGPath)
+            CGContextSetStrokeColorWithColor(ctx, UIColor.blueColor().CGColor)
+            CGContextSetLineWidth(ctx, 6)
+            CGContextStrokePath(ctx)
         }
-        
-        return cell
-    }
-    
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 30, height: maxHeight())
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 4, bottom: 0, right: 4)
+
     }
 
-}
 
 
 
 
-
-
-
-
-
-
-
-
-
-//
-//  BarCell.swift
-//  BarChartLiveStream
-//
-//  Created by Brian Voong on 3/19/17.
-//  Copyright © 2017 Lets Build That App. All rights reserved.
-//
-
+import Foundation
 import UIKit
 
-class BarCell: UICollectionViewCell {
-    
-    let barView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .red
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    var barHeightConstraint: NSLayoutConstraint?
-    
-    override var isHighlighted: Bool {
-        didSet {
-            barView.backgroundColor = isHighlighted ? .black : .red
+
+extension UIBezierPath
+{
+    func interpolatePointsWithHermite(interpolationPoints : [CGPoint], alpha: CGFloat = 1.0/3.0)
+    {
+        guard !interpolationPoints.isEmpty else { return }
+        self.moveToPoint(interpolationPoints[0])
+        
+        let n = interpolationPoints.count - 1
+        
+        for index in 0..<n
+        {
+            var currentPoint = interpolationPoints[index]
+            var nextIndex = (index + 1) % interpolationPoints.count
+            var prevIndex = index == 0 ? interpolationPoints.count - 1 : index - 1
+            var previousPoint = interpolationPoints[prevIndex]
+            var nextPoint = interpolationPoints[nextIndex]
+            let endPoint = nextPoint
+            var mx : CGFloat
+            var my : CGFloat
+            
+            if index > 0
+            {
+                mx = (nextPoint.x - previousPoint.x) / 2.0
+                my = (nextPoint.y - previousPoint.y) / 2.0
+            }
+            else
+            {
+                mx = (nextPoint.x - currentPoint.x) / 2.0
+                my = (nextPoint.y - currentPoint.y) / 2.0
+            }
+            
+            let controlPoint1 = CGPoint(x: currentPoint.x + mx * alpha, y: currentPoint.y + my * alpha)
+            currentPoint = interpolationPoints[nextIndex]
+            nextIndex = (nextIndex + 1) % interpolationPoints.count
+            prevIndex = index
+            previousPoint = interpolationPoints[prevIndex]
+            nextPoint = interpolationPoints[nextIndex]
+            
+            if index < n - 1
+            {
+                mx = (nextPoint.x - previousPoint.x) / 2.0
+                my = (nextPoint.y - previousPoint.y) / 2.0
+            }
+            else
+            {
+                mx = (currentPoint.x - previousPoint.x) / 2.0
+                my = (currentPoint.y - previousPoint.y) / 2.0
+            }
+            
+            let controlPoint2 = CGPoint(x: currentPoint.x - mx * alpha, y: currentPoint.y - my * alpha)
+            
+            self.addCurveToPoint(endPoint, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
         }
     }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addSubview(barView)
-        barHeightConstraint = barView.heightAnchor.constraint(equalToConstant: 300)
-        barHeightConstraint?.isActive = true
-        barHeightConstraint?.constant = 100
-        barView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        barView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        barView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
 }
+
+
+
+
+
+import UIKit
+import Foundation
+
+extension UIImage
+{
+    func resizeToBoundingSquare(boundingSquareSideLength boundingSquareSideLength : CGFloat) -> UIImage
+    {
+        let imgScale = self.size.width > self.size.height ? boundingSquareSideLength / self.size.width : boundingSquareSideLength / self.size.height
+        let newWidth = self.size.width * imgScale
+        let newHeight = self.size.height * imgScale
+        let newSize = CGSize(width: newWidth, height: newHeight)
+        
+        UIGraphicsBeginImageContext(newSize)
+        
+        self.drawInRect(CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+        
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        
+        UIGraphicsEndImageContext();
+        
+        return resizedImage
+    }
+}
+
+
+
