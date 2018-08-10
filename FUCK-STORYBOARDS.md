@@ -1,4 +1,51 @@
 
+
+## TabBar controller 
+```swift
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        // Override point for customization after application launch.
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = UINavigationController(rootViewController: TabViewController())
+        window?.makeKeyAndVisible()
+        return true
+    }
+```
+
+```swift
+import UIKit
+
+class TabViewController: UITabBarController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let first = ViewController()
+        first.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
+        
+        let second = HistoryViewController()
+        second.tabBarItem = UITabBarItem(tabBarSystemItem: .contacts, tag: 1)
+
+        let list = [first, second]
+        viewControllers = list
+    }
+}
+```
+
+
+```swift
+class HistoryViewController: UIViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.view.backgroundColor = .white
+    }
+}
+
+import UIKit
+class ViewController: UIViewController {
+}
+```
+
 ## CollectionView
 ```swift
 import UIKit
