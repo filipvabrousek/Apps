@@ -197,3 +197,9 @@ extension RaceController{
 }
 
 
+
+{  
+   "Zlin":"Horska Vyzva",
+   "Otrokovice":"Moraviaman",
+   "Prague":"Oravaman"
+}
