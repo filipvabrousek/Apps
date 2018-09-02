@@ -1,14 +1,30 @@
-{  
+/*{  
    "Zlin":"Horska Vyzva",
    "Otrokovice":"Moraviaman",
    "Prague":"Oravaman"
-}
+}*/
 
-[
-{"name": "Horska Vyzva",
- "url": "http://www.horskavyzva.cz/"},
- {"name": "Moraviaman",
- "url": "http://www.moraviaman.cz/"},
- {"name": "Oravaman",
- "url": "http://www.oravaman.cz/"}
-]
+
+{
+	"races": [{
+			"title": "Horska Vyzva",
+         "location": "Zlin"
+			"url": "http://www.horskavyzva.cz/",
+			"year": 2018
+		},
+
+		{
+			"title": "Moraviaman",
+         "location": "Otrokovice"
+			"url": "http://www.moraviaman.cz/",
+			"year": 2016
+		},
+
+		{
+			"title": "Oravaman",
+         "location": "Brno",
+			"url": "http://www.oravaman.cz/",
+			"year": 2015
+		}
+	]
+}
