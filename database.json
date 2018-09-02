@@ -1,0 +1,14 @@
+{  
+   "Zlin":"Horska Vyzva",
+   "Otrokovice":"Moraviaman",
+   "Prague":"Oravaman"
+}
+
+[
+{"name": "Horska Vyzva",
+ "url": "http://www.horskavyzva.cz/"},
+ {"name": "Moraviaman",
+ "url": "http://www.moraviaman.cz/"},
+ {"name": "Oravaman",
+ "url": "http://www.oravaman.cz/"}
+]
