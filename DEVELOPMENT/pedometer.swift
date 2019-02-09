@@ -7,5 +7,6 @@
                 print("Number of steps \(data.numberOfSteps)")
             } 
         }
+     
     }
  }
