@@ -34,7 +34,7 @@
         constructor(from, sender, message){
             this.from = from;
             this.sender = sender;
-            this.messages = message;
+            this.message = message;
         }
     }
         
@@ -94,7 +94,7 @@
 			var from = item.from;
 			var to = item.to;
 			var val = item.body;
-            var sender = item.sender;
+            var sender = item.sname;
 
                 
 			//firebase.auth().currentUser.uid;
@@ -151,7 +151,17 @@
 				if (allow == true){
                 real.push(user);
 				console.log("User: " + user.email + "rt: " + user.runtime);
-                S("p").innerHTML += ("<h2>" + user.email + "</h2>");
+               
+                    
+                    console.log("OOOO " + posts[0].sender);
+                    
+                let messages = getForUser(nick, posts);
+                console.log("23E " + messages.length);
+                    
+                    
+                    let last = messages.reverse();
+                    
+                     S("p").innerHTML += "<h2>" + user.email + "</h2>" + "<p>" + last[0].message + "</p>";
                     
                 // getFor User
 				}
@@ -160,7 +170,33 @@
         });
         }, 3000);
         
+        
+        
+        /*
+        
+        	let db = firebase.database();
+				db.ref("chatids/" + myid).set({
+					selffrom: myid,
+					selfto: arr[i].uid, // WHY IS THIS UNDEFINED ???
+					curr: myid,
+					email: arr[i].email,
+                    rectoken: arr[i].rectoken,
+                    location: value,
+                    url: arr[i].url,
+                    nickname: arr[i].nickname
+				});
 
+				var name = "chat.html";
+				window.open(name, "_top");
+        
+        
+        
+        
+        
+        */
+        
+
+    // http://gjszlin.cz/ivt/seminare.php?sekce=souboryprostudenty
         
              /*
             db.ref("Users").orderByKey().once("value", function(snap) { // filter just users with same race
@@ -202,9 +238,9 @@
         
         function getForUser(sname, allmessages){
             var al = [];
+            console.log("SX " + allmessages[0].sender);
             al = allmessages.filter(x => x.sender == sname);
-            
-            console.log("al is " + al);
+            console.log("COUNTO " + al.length);
             return al
             
             
