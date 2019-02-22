@@ -71,8 +71,6 @@
     firebase.auth().onAuthStateChanged(user => {
 
 
-
-
     	if (user) {
 
     		var allowedfetch = [];
@@ -181,6 +179,28 @@
     						all.forEach((el, i) => {
     							el.addEventListener("click", () => {
     								alert("Show chat"); // print ids here
+                                    
+                                    
+                                    
+                              let alertstr = "myid " + curr + " \n arr[i].uid user.id" + ch.key + " \n myid" + "email" + user.email + "\n rectoken " + rectoken + " \n URL "+ url + "NICK" + nick  ;
+                                    
+                             
+                                    
+                                    
+                let db = firebase.database();
+				db.ref("chatids/" + curr).set({
+					selffrom: curr,
+					selfto: ch.key, // WHY IS THIS UNDEFINED ???
+					curr: curr,
+					email: email,
+                    rectoken: rectoken,
+                    location: "xx",
+                    url: url,
+                    nickname: nick
+				});
+                                    
+                            var name = "chat.html";
+                        window.open(name, "_top");
     							});
     						})
     						// getFor User
@@ -201,28 +221,7 @@
     		}
 
 
-    		/*
-        
-        	let db = firebase.database();
-				db.ref("chatids/" + myid).set({
-					selffrom: myid,
-					selfto: arr[i].uid, // WHY IS THIS UNDEFINED ???
-					curr: myid,
-					email: arr[i].email,
-                    rectoken: arr[i].rectoken,
-                    location: value,
-                    url: arr[i].url,
-                    nickname: arr[i].nickname
-				});
-
-				var name = "chat.html";
-				window.open(name, "_top");
-        
-        
-        
-        
-        
-        */
+    		
 
 
 
