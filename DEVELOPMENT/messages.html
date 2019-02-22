@@ -27,182 +27,181 @@
     
     
     <script>
-        
-        var real = [];
-        
+    var real = [];
+
     class Post {
-        constructor(from, sender, message){
-            this.from = from;
-            this.sender = sender;
-            this.message = message;
-        }
+    	constructor(from, sender, message) {
+    		this.from = from;
+    		this.sender = sender;
+    		this.message = message;
+    	}
     }
-        
-        
-        class User {
-	constructor(email, runtime, swimtime, proximity, uid, url, rectoken, nickname) {
-		this.email = email;
-		this.runtime = runtime;
-		this.swimtime = swimtime;
-		this.proximity = proximity;
-		this.uid = uid;
-        this.url = url;
-        this.rectoken = rectoken;
-        this.nickname = nickname
-	}
-}
 
-        
-        
-        function S(el) {
-	return document.querySelector(el);
-}
-        
-         function SA(el) {
-	return document.querySelectorAll(el);
-}
-        
-    
-    	let db = firebase.database();
-        
-        
-        
-       
-        
+
+    class User {
+    	constructor(email, runtime, swimtime, proximity, uid, url, rectoken, nickname) {
+    		this.email = email;
+    		this.runtime = runtime;
+    		this.swimtime = swimtime;
+    		this.proximity = proximity;
+    		this.uid = uid;
+    		this.url = url;
+    		this.rectoken = rectoken;
+    		this.nickname = nickname
+    	}
+    }
+
+
+
+    function S(el) {
+    	return document.querySelector(el);
+    }
+
+    function SA(el) {
+    	return document.querySelectorAll(el);
+    }
+
+
+    let db = firebase.database();
+
+
+
+
+
     firebase.auth().onAuthStateChanged(user => {
-        
-     
-        
 
-	if (user) {
-        
-        var allowedfetch = [];
-        var globalAll = [];
-        
-        var posts = [];
 
-		var curr = user.uid;
 
-		var em = user.email;
-        console.log("Email in messages is " + em + "curr" + curr);
-        
-        
-        
-        
-        let db = firebase.database();
-		
-        // db.ref("Chat").orderByKey().on("child_added", function(snap) { // filter just us
-        
-        	db.ref("Chat").orderByKey().on("child_added", function(snap){ // filter just users with same race
-			var item = snap.val();
-			var from = item.from;
-			var to = item.to;
-			var val = item.body;
-            var sender = item.sname;
 
-                
-			//firebase.auth().currentUser.uid;
-           
-                
-                
-            let p = new Post(from, sender, val);
-            globalAll.push(p);
-                console.log("TO  " + to + "  uid  " + curr);
-          
-                if (to == curr) {
-            posts.push(p);
-            allowedfetch.push(from); // used in getForUser
-          
-                console.log("PUSHED");
-            }
-                
-       
-             
-		});
-        
-        
-        
-        setTimeout(() =>{
-                    db.ref("Users").orderByKey().once("value").then(function(snap){
-            snap.forEach(function(ch) {
-				var item = ch.val();
-				var email = item.email;
-				var races = item.race;
-				var rt = item.rtime;
-				var st = item.stime;
-                var url = item.url;
-                var nick = item.nickname;
-				var uid = ch.key;
-                var rectoken = item.token;
-				var proximity = 0;
+    	if (user) {
 
-				var allow = false;
+    		var allowedfetch = [];
+    		var globalAll = [];
 
-				var rarr = races.split("-");
-				rarr.pop();
-                
-                allow = false; // of globall.contains ch.key
+    		var posts = [];
 
-                console.log(allowedfetch.length);
-                if (allowedfetch.includes(ch.key)){
-                   allow = true;
-                }
-                console.log("key" + ch.key);
-                
-				let user = new User(email, rt, st, 0, uid, url, rectoken, nick);
+    		var curr = user.uid;
 
-                
-                
-				//if (allow == true && races != "" && email != mymail && rectoken != "not found") {
-				if (allow == true){
-                real.push(user);
-				console.log("User: " + user.email + "rt: " + user.runtime);
-               
-                    
-                    console.log("OOOO " + posts[0].sender);
-                    
-                    // defien here
-           
-                    
-                let messages = getForUser(nick, posts);
-                console.log("23E " + messages.length);
-                    
-                    
-                    
-        
-                    let last = messages.reverse();
-                    
-                    let str =  `<div class = "m">` + "<h2>" + user.email + "</h2>" + "<p>" + last[0].message + "</p>" + "</div>";
-                  
-                    S("p").innerHTML += str;
-                    
-                   
-                 
-                     let all = SA(".m");
-                    all.forEach((el, i) =>{
-                        el.addEventListener("click", () => {
-                        alert("Show chat"); // print ids here
-                    });
-                    })
-                // getFor User
-				}
+    		var em = user.email;
+    		console.log("Email in messages is " + em + "curr" + curr);
 
-			});
-        });
-            
-           
-        
-            
-            
-        }, 3000);
-        
-        
-               function toChat(){
-         alert("SKip");
-        }
-       
-        
-        /*
+
+
+
+    		let db = firebase.database();
+
+    		// db.ref("Chat").orderByKey().on("child_added", function(snap) { // filter just us
+
+    		db.ref("Chat").orderByKey().on("child_added", function(snap) { // filter just users with same race
+    			var item = snap.val();
+    			var from = item.from;
+    			var to = item.to;
+    			var val = item.body;
+    			var sender = item.sname;
+
+
+    			//firebase.auth().currentUser.uid;
+
+
+
+    			let p = new Post(from, sender, val);
+    			globalAll.push(p);
+    			console.log("TO  " + to + "  uid  " + curr);
+
+    			if (to == curr) {
+    				posts.push(p);
+    				allowedfetch.push(from); // used in getForUser
+
+    				console.log("PUSHED");
+    			}
+
+
+
+    		});
+
+
+
+    		setTimeout(() => {
+    			db.ref("Users").orderByKey().once("value").then(function(snap) {
+    				snap.forEach(function(ch) {
+    					var item = ch.val();
+    					var email = item.email;
+    					var races = item.race;
+    					var rt = item.rtime;
+    					var st = item.stime;
+    					var url = item.url;
+    					var nick = item.nickname;
+    					var uid = ch.key;
+    					var rectoken = item.token;
+    					var proximity = 0;
+
+    					var allow = false;
+
+    					var rarr = races.split("-");
+    					rarr.pop();
+
+    					allow = false; // of globall.contains ch.key
+
+    					console.log(allowedfetch.length);
+    					if (allowedfetch.includes(ch.key)) {
+    						allow = true;
+    					}
+    					console.log("key" + ch.key);
+
+    					let user = new User(email, rt, st, 0, uid, url, rectoken, nick);
+
+
+
+    					//if (allow == true && races != "" && email != mymail && rectoken != "not found") {
+    					if (allow == true) {
+    						real.push(user);
+    						console.log("User: " + user.email + "rt: " + user.runtime);
+
+
+    						console.log("OOOO " + posts[0].sender);
+
+    						// defien here
+
+
+    						let messages = getForUser(nick, posts);
+    						console.log("23E " + messages.length);
+
+
+
+
+    						let last = messages.reverse();
+
+    						let str = `<div class = "m">` + "<h2>" + user.email + "</h2>" + "<p>" + last[0].message + "</p>" + "</div>";
+
+    						S("p").innerHTML += str;
+
+
+
+    						let all = SA(".m");
+    						all.forEach((el, i) => {
+    							el.addEventListener("click", () => {
+    								alert("Show chat"); // print ids here
+    							});
+    						})
+    						// getFor User
+    					}
+
+    				});
+    			});
+
+
+
+
+
+    		}, 3000);
+
+
+    		function toChat() {
+    			alert("SKip");
+    		}
+
+
+    		/*
         
         	let db = firebase.database();
 				db.ref("chatids/" + myid).set({
@@ -224,27 +223,24 @@
         
         
         */
-        
 
-    
-        function getForUser(sname, allmessages){
-            var al = [];
-            console.log("SX " + allmessages[0].sender);
-            al = allmessages.filter(x => x.sender == sname);
-            console.log("COUNTO " + al.length);
-            return al
-            
-            
-        }
-    }
-        
-        
-        
-        
+
+
+    		function getForUser(sname, allmessages) {
+    			var al = [];
+    			console.log("SX " + allmessages[0].sender);
+    			al = allmessages.filter(x => x.sender == sname);
+    			console.log("COUNTO " + al.length);
+    			return al
+
+
+    		}
+    	}
+
+
+
+
     });
-        
-        
-        
         
     </script>
     
