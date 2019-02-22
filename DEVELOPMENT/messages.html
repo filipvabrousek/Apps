@@ -58,6 +58,10 @@
 	return document.querySelector(el);
 }
         
+         function SA(el) {
+	return document.querySelectorAll(el);
+}
+        
     
     	let db = firebase.database();
         
@@ -147,6 +151,8 @@
                 
 				let user = new User(email, rt, st, 0, uid, url, rectoken, nick);
 
+                
+                
 				//if (allow == true && races != "" && email != mymail && rectoken != "not found") {
 				if (allow == true){
                 real.push(user);
@@ -155,22 +161,46 @@
                     
                     console.log("OOOO " + posts[0].sender);
                     
+                    // defien here
+           
+                    
                 let messages = getForUser(nick, posts);
                 console.log("23E " + messages.length);
                     
                     
+                    
+        
                     let last = messages.reverse();
                     
-                     S("p").innerHTML += "<h2>" + user.email + "</h2>" + "<p>" + last[0].message + "</p>";
+                    let str =  `<div class = "m">` + "<h2>" + user.email + "</h2>" + "<p>" + last[0].message + "</p>" + "</div>";
+                  
+                    S("p").innerHTML += str;
                     
+                   
+                 
+                     let all = SA(".m");
+                    all.forEach((el, i) =>{
+                        el.addEventListener("click", () => {
+                        alert("Show chat"); // print ids here
+                    });
+                    })
                 // getFor User
 				}
 
 			});
         });
+            
+           
+        
+            
+            
         }, 3000);
         
         
+               function toChat(){
+         alert("SKip");
+        }
+       
         
         /*
         
@@ -196,46 +226,7 @@
         */
         
 
-    // http://gjszlin.cz/ivt/seminare.php?sekce=souboryprostudenty
-        
-             /*
-            db.ref("Users").orderByKey().once("value", function(snap) { // filter just users with same race
-			snap.forEach(function(ch) {
-				var item = ch.val();
-				var email = item.email;
-				var races = item.race;
-				var rt = item.rtime;
-				var st = item.stime;
-                var url = item.url;
-                var nick = item.nickname;
-				var uid = ch.key;
-                var rectoken = item.token;
-				var proximity = 0;
-
-				var allow = false;
-
-				var rarr = races.split("-");
-				rarr.pop();
-                
-                allow = true; // of globall.contains ch.key
-
-                if (allowedfetch.includes(ch.key)){
-                    console.log("Nice");
-                }
-                console.log("key" + ch.key);
-                
-				let user = new User(email, rt, st, 0, uid, url, rectoken, nick);
-
-				//if (allow == true && races != "" && email != mymail && rectoken != "not found") {
-				if (allow == true){
-                real.push(user);
-				console.log("User: " + user.email + "rt: " + user.runtime);
-				}
-
-			});
-            
-        });*/
-        
+    
         function getForUser(sname, allmessages){
             var al = [];
             console.log("SX " + allmessages[0].sender);
@@ -256,4 +247,14 @@
         
         
     </script>
+    
+    
+    <style>
+        .m{
+            margin: 3em;
+            width: 10em;
+            height: 3em;
+            background: green;
+        }
+    </style>
 </body>
