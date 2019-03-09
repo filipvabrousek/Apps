@@ -3,6 +3,8 @@
 
 ```swift
 
+import UIKit
+
 extension UIView {
     enum P {
         case top
@@ -22,7 +24,7 @@ extension UIView {
         case bottom
     }
     
-    func ignorePin(a: S, dist: CGFloat, w: CGFloat, h:CGFloat){ // ignoring safeAreLayout
+    func ignorePin(a: S, dist: CGFloat, w: CGFloat, h:CGFloat) {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.widthAnchor.constraint(equalToConstant: w).isActive = true
         self.heightAnchor.constraint(equalToConstant: h).isActive = true
@@ -40,8 +42,6 @@ extension UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         self.widthAnchor.constraint(equalToConstant: sup.frame.width).isActive = true
-        /*  self.leftAnchor.constraint(equalTo: sup.leftAnchor).isActive = true
-         self.rightAnchor.constraint(equalTo: sup.rightAnchor).isActive = true */
         
         if safe == true {
             self.bottomAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.bottomAnchor).isActive = true
@@ -73,7 +73,7 @@ extension UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         self.widthAnchor.constraint(equalToConstant: sup.frame.width - margin).isActive = true
-        self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // +
+        self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
         
         
         if bottom != nil {
@@ -90,7 +90,7 @@ extension UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         self.widthAnchor.constraint(equalToConstant: sup.frame.width - margin).isActive = true
-        self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // +
+        self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
         
         self.heightAnchor.constraint(equalToConstant: height).isActive = true
         
@@ -103,7 +103,7 @@ extension UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         self.widthAnchor.constraint(equalTo: sup.widthAnchor).isActive = true
-        //self.centerXAnchor = sup.centerXAnchor
+        
         if top != nil {
             self.topAnchor.constraint(equalTo: top!.bottomAnchor, constant: 0).isActive = true
         }
@@ -165,24 +165,23 @@ extension UIView {
         self.heightAnchor.constraint(equalToConstant: h).isActive = true
         
         
-        print("S \(self)")
         let sup = self.superview!
         
         if a == .bottom {
-            self.bottomAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.bottomAnchor, constant: -ac).isActive = true // safeAR
+            self.bottomAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.bottomAnchor, constant: -ac).isActive = true
         }
-       
+        
         if a == .top && b != .center {
             self.topAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.topAnchor, constant: ac).isActive = true
         }
         
         if a == .top && b == .center {
-            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // ac
+            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
             self.centerYAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.topAnchor, constant: ac).isActive = true
         }
         
-        if a == .bottom && b == .center { // new addition ???
-            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // newl
+        if a == .bottom && b == .center {
+            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
             self.centerYAnchor.constraint(equalTo: sup.safeAreaLayoutGuide.bottomAnchor, constant: ac).isActive = true
         }
         
@@ -201,12 +200,12 @@ extension UIView {
         }
         
         if a == .top && b == .center && to != nil {
-            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // ac
+            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
             self.centerYAnchor.constraint(equalTo: (to?.bottomAnchor)!, constant: ac).isActive = true
         }
         
         if a == .bottom && b == .center && to != nil {
-            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true // ac
+            self.centerXAnchor.constraint(equalTo: sup.centerXAnchor).isActive = true
             self.centerYAnchor.constraint(equalTo: (to?.bottomAnchor)!, constant: -ac).isActive = true
         }
         
@@ -239,19 +238,19 @@ extension UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = within
         
-        let final = (contentWidth / self.frame.width) * self.frame.width // This is nan
-       
+        let final = (contentWidth / self.frame.width) * self.frame.width
+        
         self.widthAnchor.constraint(equalToConstant: final).isActive = true
         
         self.topAnchor.constraint(equalTo: sup.topAnchor, constant: insets[0]).isActive = true
         
         self.leftAnchor.constraint(equalTo: sup.leftAnchor, constant: insets[1]).isActive = true
-
+        
         self.heightAnchor.constraint(equalToConstant: height).isActive = true
     }
     
     
- 
+    
     
     
     func stretchH(within: UIView, height: CGFloat, insets: [CGFloat]){
@@ -313,7 +312,7 @@ extension UIView {
     
     
     
-    func paddingPin(_ view: UIView?, position: Q, w: CGFloat, h: CGFloat, margin: CGFloat /*margin: [CGFloat]*/){
+    func paddingPin(_ view: UIView?, position: Q, w: CGFloat, h: CGFloat, margin: CGFloat){
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         
@@ -330,7 +329,7 @@ extension UIView {
             }
         }
         
-
+        
         
         if position == .left {
             if view != nil {
@@ -340,7 +339,7 @@ extension UIView {
             }
         }
         
-
+        
         
         if position == .right {
             if view != nil {
@@ -362,7 +361,7 @@ extension UIView {
     }
     
     
-    func pinTo(_ view: UIView?, position: Q, h: CGFloat, margin: CGFloat /*margin: [CGFloat]*/){
+    func pinTo(_ view: UIView?, position: Q, h: CGFloat, margin: CGFloat){
         self.translatesAutoresizingMaskIntoConstraints = false
         let sup = self.superview!
         
@@ -378,7 +377,7 @@ extension UIView {
             }
         }
         
-
+        
         
         if position == .left {
             if view != nil {
