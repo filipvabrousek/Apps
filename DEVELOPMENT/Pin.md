@@ -1,4 +1,4 @@
-# Pin.js
+# Pin.swift
 * Simple Swift Auto Layout library for building effortless constraints
 
 ```swift
