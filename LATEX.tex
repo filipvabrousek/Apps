@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{minted}
+\usepackage{graphicx}
 
 
 \title{SIN}
@@ -11,7 +12,7 @@
 
 \maketitle
 
-Obsah
+\section{Obsah}
 
 Motivace \hfill \break
 Technická část (Xcode, Swift)  \hfill \break
@@ -23,6 +24,12 @@ Layout vs Storyboard  \hfill \break
 \section{Motivace}
 
 	V dnešní době se stále častěji používají mobilní telefony a vyvstává nutnost rychlého  přístupu k informacím. Mobilním aplikacím se v poslední době daří tuto potřebu splňovat. Ať už potřebujete zavolat známému, najít si nejbližší kino, nebo trasu do jiného města, bez mobilních aplikací byste se v dnešní době již neobešli. Jako nadšený sportovec a vývojář mobilních aplikací jsem se rozhodl, že se pokusím vytvořit celosvětovou párovací aplikaci na závody swimrun - Swimrun World.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=90mm]{"https://gjszlin.bakalari.cz/next/images/LOGIN/login-logo.png"}
+\caption{A simple caption \label{overflow}}
+\end{figure}
 
 
 \vspace{10 mm}
@@ -81,22 +88,25 @@ Na tvorbu ikon do Tab Baru a na tvorbu ikony samotné aplikace jsem použil Adob
 \section{Layout vs. Storyboard}
 
 Interface Builder (Storyboard)
-Interface Builder je vestavěné prostředí pro tvorbu uživatelského prstředí aplikace, které funguje na principu drag & drop. Mezi standardní elementy systému iOS patří: buttons, navbar, mapview, uiview atd.
+Interface Builder je vestavěné prostředí pro tvorbu uživatelského prstředí aplikace, které funguje na principu drag and drop. Mezi standardní elementy systému iOS patří: buttons, navbar, mapview, uiview atd.
 \vspace{10 mm}
 
-Já jsem se rozhodl použít celou aplikaci napsat v kódu bez použití Storyboardu. 
-Jedním z hlavních důvodů byla práce s AutoLayoutem, který v módu Storyboardu zahrnuje více klikání, je lehčí ho pochopit a snadnější měnit. 
+Já jsem se rozhodl celou aplikaci napsat v kódu bez použití Storyboardu. 
+Jedním z hlavních důvodů byla práce s AutoLayoutem, který v módu Storyboardu zahrnuje více klikání. V kódu je lehčí ho pochopit a snadnější měnit. 
 Pro tento postup jsme se rozhodl, kvůli snažší údržbě kódu a pohodlnější práci na menších úhlopříčkách monitoru. Pokud se rozhodnete napsat aplikaci pomocí kódu, je potřeba v metodě AppDelegate vytvořit vstupní okno, přiřadit k němu náležící třídu a zobrazit ho uživateli následujícím způsobem:
 \vspace{10 mm}
 
+\begin{minted}{swift}
 @UIApplicationMain
 
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
-  window = UIWindow(frame: UIScreen.main.bounds)…
+class AppDelegate: UIResponder, UIApplicationDelegate,
+UNUserNotificationCenterDelegate, MessagingDelegate {
+  window = UIWindow(frame: UIScreen.main.bounds)
   window?.rootViewController = UINavigationController(rootViewController: LogController())
-    window?.makeKeyAndVisible()
+  window?.makeKeyAndVisible()
 }
     
+\end{minted}
 \vspace{10 mm}
 
 
@@ -285,7 +295,8 @@ Dále bylo potřeba zařídit aby se po klepnutí na notifikaci otevřela chatov
 
 \vspace{10 mm}
 \begin{minted}{swift}
- func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+ func userNotificationCenter(_ center: UNUserNotificationCenter,
+ didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
        
         let data = response.notification.request.content.userInfo
         
@@ -367,16 +378,16 @@ tosign.pin(a: .top, b: .center, ac: 320, bc: 0, w: 200, h: 30, to: nil)
 Ke správnému fungování aplikace bylo potřeba vymyslet algoritmus, který uživatele seřadí dle výkonosti relativně k vám. Proto jsem napsal funkci proximity, která vyžaduje následující argumenty:
 
 $myswim$: můj čas na 1km plavání ve fromátu “mm:ss”
-myrun: můj čas na 10km běhu “mm:ss”
-
-hisswim: čas uživatele na 1km plavání, se kterým se porovnávám 
+myrun: můj čas na 10km běhu “mm:ss” a 
+$hisswim$: čas uživatele na 1km plavání, se kterým se porovnávám 
 hisrun: čas uživatele na 10km běhu, se kterým se porovnávám 
 
 
 
 \vspace{10 mm}
   \begin{minted}{swift}
-    func proximity(email: String, myswim: Int, myrun: Int, hisswim: String, hisrun:String) -> Double {
+    func proximity(email: String, myswim: Int,
+    myrun: Int, hisswim: String, hisrun:String) -> Double {
         
         let hisswim = hisswim.toSec()
         let hisrun = hisrun.toSec()
@@ -425,10 +436,12 @@ extension String {
 
 Pro ostatní uživatele jsem se rozhodl vytvořit webovou verzi aplikace. Využil jsem JavaScriptu a responzivity jsem dosáhl pomocí CSS Gridu, Flexboxu a Media Queries na tvorbu webu jsem použil software Brackets. 
 
+\vspace{5 mm}
 Příklad rozvržení úvodní obrazovky:
-
+\vspace{8 mm}
 
 HTML:
+\vspace{5 mm}
 \begin{minted}{html}
 <div id = "centersection">
     
