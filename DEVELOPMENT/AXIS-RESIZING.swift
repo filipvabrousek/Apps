@@ -5,4 +5,4 @@ func era(h: Double, curr: Double, max: Double, min: Double) -> Double {
 }
 
 var res = era(h: 200, curr: 162.5, max: 130, min: 195)
-print("Res \(res)")
+print("Res \(res)") // 100 in half of the element
